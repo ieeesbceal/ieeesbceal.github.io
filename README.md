@@ -95,7 +95,7 @@ This project is maintained by passionate members of **IEEE SB CEAL** and **CEAL 
 ### 👨‍💻 Contributors
 - [Muhammed S](https://github.com/muhammeds88)
 - [Sabari D Raj](https://github.com/sabari-D-raj)
-- [Jeevan Sanal](https://github.com/Jeevansanal2872)
+- [Jeevan S](https://github.com/Jeevansanal2872)
 - [Adithyan U P](https://github.com/ZEON-07)
 - [Aromal](https://github.com/zyndor1548)
 - [Sreedev S S](https://github.com/MTCodes01)
