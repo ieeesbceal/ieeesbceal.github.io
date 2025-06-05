@@ -1,0 +1,197 @@
+<style>
+    .nav-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        pointer-events: none;
+    }
+
+    .nav-bar {
+        background: rgba(255, 255, 255, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 30vh;
+        width: 75%;
+        margin: 1vh auto;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        pointer-events: auto;
+        backdrop-filter: blur(10px);
+        transform-origin: center;
+    }
+
+    .nav-container.scrolled .nav-bar {
+        width: 100%;
+        margin: 0 auto;
+        border-radius: 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+        background-color: #0055A4;
+        padding: 0 20px;
+        border-radius: 30vh 0 0 30vh;
+        height: 8vh;
+        display: flex;
+        align-items: center;
+        transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .nav-container.scrolled .logo {
+        border-radius: 0;
+    }
+
+    .logo img {
+        height: 5vh;
+        width: auto;
+    }
+
+    .navhold {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 30px;
+        list-style: none;
+        font-weight: bold;
+        align-items: center;
+    }
+
+    .nav-links li {
+        position: relative;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: black;
+        font-size: 1rem;
+        padding: 10px 5px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .nav-links a::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 3px;
+        background: #FFA500;
+        transition: width 0.3s;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+        width: 100%;
+    }
+
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 120%;
+        left: 0;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        display: none;
+        flex-direction: column;
+        min-width: 100px;
+        border-radius: 10px;
+        padding: 8px 0;
+        z-index: 999;
+    }
+
+    .dropdown:hover .dropdown-menu {
+        display: flex;
+    }
+
+    .dropdown-menu li {
+        padding: 10px 20px;
+        list-style: none;
+        white-space: nowrap;
+        transition: background 0.3s;
+    }
+
+    .dropdown-menu li:hover {
+        background-color: #f5f5f5;
+    }
+
+    .dropdown-menu a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .IEEE {
+        background-color: #0055A4;
+        height: 8vh;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        border-radius: 0 30vh 30vh 0;
+        transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .nav-container.scrolled .IEEE {
+        border-radius: 0;
+    }
+
+    .IEEE a.join-btn {
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+</style>
+<div class="nav-container">
+    <div class="nav-bar">
+        <div class="logo">
+            <a href="#"><img src="logos/IEEE_SB_CEAL.png" alt=""></a>
+        </div>
+        <div class="navhold">
+            <ul class="nav-links">
+                <li><a class="active" href="#">Home</a></li>
+                <li><a href=#>About</a></li>
+                <li class="dropdown">
+                    <a href="#">Societies</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">CS</a></li>
+                        <li><a href="#">EMBS</a></li>
+                        <li><a href="#">IAS</a></li>
+                        <li><a href="#">PELS</a></li>
+                        <li><a href="#">PES</a></li>
+                        <li><a href="#">RAS</a></li>
+                        <li><a href="#">SPS</a></li>
+                        <li><a href="#">WIE</a></li>
+                    </ul>
+                </li>
+                </li>
+                <li><a href="#">Events</a></li>
+                <li><a href="#">Gallery</a></li>
+                <li><a href="#">Resources</a></li>
+            </ul>
+        </div>
+        <div class="IEEE">
+            <a href="#" class="join-btn">Join IEEE</a>
+        </div>
+
+    </div>
+</div>
+
+<div class="landing-page">
+    <div class="landing-content">
+        <h1>IEEE CEAL SB</h1>
+        <p>Empowering the Future of Technology</p>
+        <a href="#" class="explore-btn">Explore Now</a>
+    </div>
+</div>
