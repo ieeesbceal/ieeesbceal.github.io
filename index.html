@@ -11,48 +11,7 @@
 
 <body>
   <!-- Nav bar -->
-  <div class="nav-container">
-    <div class="nav-bar">
-      <div class="logo">
-        <a href="#"><img src="logos/IEEE_SB_CEAL.png" alt=""></a>
-      </div>
-      <div class="navhold">
-        <ul class="nav-links">
-          <li><a class="active" href="#">Home</a></li>
-          <li><a href=#>About</a></li>
-          <li class="dropdown">
-            <a href="#">Societies</a>
-            <ul class="dropdown-menu">
-              <li><a href="#">CS</a></li>
-              <li><a href="#">EMBS</a></li>
-              <li><a href="#">IAS</a></li>
-              <li><a href="#">PELS</a></li>
-              <li><a href="#">PES</a></li>
-              <li><a href="#">RAS</a></li>
-              <li><a href="#">SPS</a></li>
-              <li><a href="#">WIE</a></li>
-            </ul>
-          </li>
-          </li>
-          <li><a href="#">Events</a></li>
-          <li><a href="#">Gallery</a></li>
-          <li><a href="#">Resources</a></li>
-        </ul>
-      </div>
-      <div class="IEEE">
-        <a href="#" class="join-btn">Join IEEE</a>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="landing-page">
-    <div class="landing-content">
-      <h1>IEEE CEAL SB</h1>
-      <p>Empowering the Future of Technology</p>
-      <a href="#" class="explore-btn">Explore Now</a>
-    </div>
-  </div>
+  <div id="NavBar"></div>
 
   <!-- Added the 1000px height section for testing scrolling effect of nav bar -->
   <section id="about" class="about-section" style="height: 1000px;"></section>
@@ -121,86 +80,10 @@
   </section>
 
   <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-container">
-      <div class="footer-column">
-        <h3>IEEE CEAL SB</h3>
-        <p>Attingal<br>Thiruvananthapuram-695101, Kerala</p>
-        <p><strong>Phone:</strong> +91 9845612345<br>
-          <strong>Email:</strong> ieee@ceattingal.ac.in
-        </p>
-      </div>
-
-      <div class="footer-column">
-        <h4>Links</h4>
-        <ul>
-          <li><a href="#">Home</a></li>
-          <li><a href="#">About us</a></li>
-          <li><a href="#">Events</a></li>
-          <li><a href="#">Gallery</a></li>
-          <li><a href="#">Resources</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-column">
-        <h4>Societies</h4>
-        <ul>
-          <li><a href="#">Computer Society</a></li>
-          <li><a href="#">Power and Energy Society</a></li>
-          <li><a href="#">Signal Processing Society</a></li>
-          <li><a href="#">Robotics and Automation Society</a></li>
-          <li><a href="#">Women in Engineering
-          <li><a href="#">Power Electronics Society</a></li>
-
-          <li><a href="#">Engineering in Medicine and Biology Society
-          <li><a href="#">Industry Applications Society</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-column">
-        <h4>Useful Links</h4>
-        <ul>
-          <li><a href="#">IEEE</a></li>
-          <li><a href="#">IEEE KERALA SECTION</a></li>
-          <li><a href="#">IEEE LINK</a></li>
-          <li><a href="#">CEAL</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="social-icons">
-      <a href="https://facebook.com" target="_blank"><i class="fab fa-facebook-f"></i></a>
-      <a href="https://instagram.com" target="_blank"><i class="fab fa-instagram"></i></a>
-      <a href="https://youtube.com" target="_blank"><i class="fab fa-youtube"></i></a>
-      <a href="https://linkedin.com" target="_blank"><i class="fab fa-linkedin-in"></i></a>
-      <a href="https://github.com" target="_blank"><i class="fab fa-github"></i></a>
-    </div>
-
-    <div class="copyright">
-      <p>© Copyright <strong>IEEE CEAL SB <span id="yr"></span></strong>. All Rights Reserved</p>
-    </div>
-  </footer>
-
+  <div id="Footer"></div>
+  <!-- script loading -->
   <script src="./script.js"></script>
-
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("yr").textContent = new Date().getFullYear();
-      const navContainer = document.querySelector('.nav-container');
-      const scrollThreshold = 50;
-
-      function handleScroll() {
-        if (window.scrollY > scrollThreshold) {
-          navContainer.classList.add('scrolled');
-        } else {
-          navContainer.classList.remove('scrolled');
-        }
-      }
-
-      window.addEventListener('scroll', handleScroll);
-    });
-  </script>
-
+  <script src="./navbarfooterloader.js"></script>
 </body>
 
 </html>
