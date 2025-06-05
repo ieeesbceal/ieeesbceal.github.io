@@ -239,6 +239,79 @@ html {
     background-color: #003d80;
 }
 
+/* Logo Bar */
+.logo-bar {
+    flex: 0 0 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 75px;
+    background-color: #f2f2f2;
+    padding: 20px 0;
+}
+
+/* About Section */
+.about-section {
+    flex: 0 0 55%;
+    display: flex;
+    padding: 3vh 5vw;
+    gap: 40px;
+    background-color: #ffffff;
+}
+
+.left-column,
+.right-column {
+    flex: 1;
+}
+
+.left-column h1 {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.left-column h2 {
+    font-size: 22px;
+    margin-top: 10px;
+}
+
+.right-column p {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.right-column ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.right-column li {
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+/* Stats Section */
+.stats {
+    flex: 0 0 30%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 160px;
+    flex-wrap: wrap;
+    padding-bottom: 40px;
+    /* Bottom gap built-in */
+}
+
+.stat-box h3 {
+    font-size: 36px;
+}
+
+.stat-box p {
+    font-size: 16px;
+}
+
 /* Contact Section */
 
 .container {
