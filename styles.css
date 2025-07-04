@@ -123,6 +123,19 @@ html {
     color: var(--primary-color); /* Uses the primary color */
 }
 
+.about-section .left-column h1::after {
+    content: '';
+    display: block;
+    width: 5%;
+    height: 0.4vh;
+    background: #FFA500;
+    transition: width 0.3s;
+}
+
+.about-section .left-column h1:hover::after {
+    width: 15%;
+}
+
 .about-section .left-column h2 {
     font-size: 1.5rem;
     color: var(--text-color);

@@ -20,4 +20,12 @@
     .about-section .right-column p {
         text-align: justify;
     }
+
+    .about-section .left-column h1::after {
+        width: 100%;
+    }
+
+    .about-section .left-column h1:hover::after {
+        width: 100%;
+    }
 }
