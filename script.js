@@ -30,6 +30,50 @@ const countUpConfig = {
   }
 };
 
+function setupIntersectionObserver(selector, callback, options = {}) {
+  // Set default options
+  const defaultOptions = {
+    threshold: 0.5,
+    once: true,
+    root: null,
+    rootMargin: "0px",
+  };
+  const mergedOptions = { ...defaultOptions, ...options };
+
+  const targetElement = document.querySelector(selector);
+
+  if (!targetElement) {
+    console.warn(
+      `IntersectionObserver: Element with selector "${selector}" not found.`
+    );
+    return; // Exit if the element doesn't exist
+  }
+
+  const observer = new IntersectionObserver(
+    (entries, observerInstance) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          // Execute the provided callback function
+          callback(entry);
+
+          // If 'once' option is true, stop observing after the first intersection
+          if (mergedOptions.once) {
+            observerInstance.unobserve(entry.target);
+          }
+        }
+      });
+    },
+    {
+      threshold: mergedOptions.threshold,
+      root: mergedOptions.root,
+      rootMargin: mergedOptions.rootMargin,
+    }
+  );
+
+  // Start observing the target element
+  observer.observe(targetElement);
+}
+
 // Easing function for smooth animation
 function easeOutQuart(t) {
   return 1 - (--t) * t * t * t;
@@ -127,20 +171,42 @@ function CreateCard(people) {
 //     }
 // };
 
+function AnimateLogoBar() {
+  // Animate the logo bar
+  const logoBar = document.getElementById("LogoBar");
+  if (!logoBar) {
+    console.error("LogoBar element not found.");
+    return;
+  }
+
+  const logos = logoBar.querySelectorAll("img");
+  const startDelay = 100; // Initial delay before starting the animation
+  const animationDelay = 250; // Delay between each logo animation in milliseconds
+  const animationDuration = 1000; // Duration of each logo's fade-in animation in milliseconds
+
+  // Initially hide all logos
+  logos.forEach((logo) => {
+    logo.style.opacity = "0";
+    logo.style.transition = `opacity ${animationDuration}ms ease-in-out`;
+  });
+
+  // Reveal logos one by one after the initial delay
+  setTimeout(() => {
+    logos.forEach((logo, index) => {
+      setTimeout(() => {
+        logo.style.opacity = "1";
+      }, index * animationDelay);
+    });
+  }, startDelay);
+}
+
 document.addEventListener("DOMContentLoaded", function () {
-    const statsSection = document.querySelector('.stats');
-    if (statsSection) {
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            startCountUpAnimations();
-            observer.unobserve(entry.target); // Only animate once
-          }
-        });
-      }, { threshold: 0.5 });
+  // Initialize the stats section
+  setupIntersectionObserver(".stats", startCountUpAnimations, { threshold: 0.5, once: true });
 
-      observer.observe(statsSection);
-    }
+  // Initialize the logo bar animation
+  setupIntersectionObserver("#LogoBar", AnimateLogoBar, { threshold: 0.1, once: true });
 
-    FetchPeopleByRoles();
+  // Fetch and display people by roles
+  FetchPeopleByRoles();
 });
