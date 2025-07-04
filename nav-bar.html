@@ -48,7 +48,12 @@
         height: 5vh;
         width: auto;
     }
-
+    .logo a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
     .navhold {
         flex-grow: 1;
         display: flex;
@@ -70,7 +75,7 @@
     .nav-links a {
         text-decoration: none;
         color: black;
-        font-size: 1rem;
+        font-size: 0.9rem;
         padding: 10px 5px;
         position: relative;
         transition: all 0.3s ease;
@@ -105,14 +110,16 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         display: none;
         flex-direction: column;
-        min-width: 100px;
+        min-width: 200px;
         border-radius: 10px;
         padding: 8px 0;
         z-index: 999;
     }
 
-    .dropdown:hover .dropdown-menu {
+    @media (min-width: 1100px) {
+      .dropdown:hover .dropdown-menu {
         display: flex;
+      }
     }
 
     .dropdown-menu li {
@@ -152,18 +159,163 @@
         font-weight: bold;
         white-space: nowrap;
     }
+    /* Hamburger Menu Styles */
+    .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        padding: 15px;
+        background: none;
+        border: none;
+        z-index: 1001;
+    }
+    .hamburger span {
+        width: 25px;
+        height: 3px;
+        background-color: #333;
+        margin: 3px 0;
+        transition: all 0.3s ease;
+        border-radius: 3px;
+    }
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(7px, 7px);
+    }
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+    }
+    /* Mobile Styles */
+    @media (max-width: 1100px) {
+        .nav-bar {
+            width: 100%;
+            border-radius: 0;
+            padding: 0;
+            margin: 0;
+            background: white;
+        }
+        .logo {
+            padding: 0 15px;
+            border-radius: 0;
+            background-color: transparent;
+        }
+        .logo img {
+            filter: invert(1);
+        }
+        .hamburger {
+            display: flex;
+            order: 2;
+        }
+        .IEEE {
+            display: none;
+            order: 3;
+            padding: 0 15px;
+            border-radius: 0;
+        }
+        .navhold {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            order: 4;
+        }
+        .navhold.active {
+            display: block;
+        }
+        .nav-links {
+            flex-direction: column;
+            gap: 0;
+            padding: 20px 0;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        .nav-links li {
+            width: 100%;
+            text-align: center;
+        }
+        .nav-links a {
+            display: block;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .nav-links a::after {
+            display: none;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: rgba(255, 165, 0, 0.1);
+            color: #0055A4;
+        }
+        /* Mobile Dropdown Styles */
+        .dropdown-menu {
+            position: static;
+            background: rgba(240, 240, 240, 0.9);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 0;
+            display: none;
+            margin-top: 0;
+        }
+        .dropdown .dropdown-menu {
+            display: none;
+        }
+        .dropdown.active .dropdown-menu {
+            display: block;
+        }
+        .dropdown-menu li {
+            padding: 12px 40px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .dropdown-menu a {
+            color: #666;
+            font-weight: 400;
+            border: none;
+        }
+        .dropdown-menu li:hover {
+            background-color: rgba(0, 85, 164, 0.1);
+        }
+        /* Mobile scroll adjustments */
+        .nav-container.scrolled .navhold {
+            border-radius: 0;
+        }
+        .nav-container.scrolled .navhold.active {
+            display: block;
+        }
+    }
+    
+    @media (max-width: 1350px) and (min-width: 1100px) {
+        .nav-bar {
+            width: 90%;
+        }
+        .nav-links {
+            gap: 20px;
+        }
+        .nav-links a {
+            font-size: 0.9rem;
+        }
+    }
 </style>
 <div class="nav-container">
     <div class="nav-bar">
         <div class="logo">
             <a href="#"><img src="./logos/white/IEEE-SB_CEAL_logo-white.png" alt=""></a>
         </div>
+        <button class="hamburger" aria-label="Toggle navigation menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
         <div class="navhold">
             <ul class="nav-links">
                 <li><a class="active" href="#">Home</a></li>
-                <li><a href=#>About</a></li>
+                <li><a href="#">About</a></li>
                 <li class="dropdown">
-                    <a href="#">Societies <i class="fa fa-caret-down"></i></a>
+                    <a href="#" class="dropdown-toggle">Societies <i class="fa fa-caret-down"></i></a>
                     <ul class="dropdown-menu">
                         <li><a href="#">Computer Society</a></li>
                         <li><a href="#">Engineering in Medicine and Biology Society</a></li>
@@ -175,14 +327,12 @@
                         <li><a href="#">Women in Engineering</a></li>
                     </ul>
                 </li>
-                </li>
                 <li><a href="#">Events</a></li>
                 <li class="dropdown">
-                    <a href="#">Execom <i class="fa fa-caret-down"></i></a>
+                    <a href="#" class="dropdown-toggle">Execom <i class="fa fa-caret-down"></i></a>
                     <ul class="dropdown-menu">
-                        <!-- Populate this list dynamically with JavaScript -->
-                        <li>Execom 2025</li>
-                        <li>Execom 2024</li>    
+                        <li><a href="#">Execom 2025</a></li>
+                        <li><a href="#">Execom 2024</a></li>
                     </ul>
                 </li>
                 <li><a href="#">Gallery</a></li>
@@ -192,6 +342,5 @@
         <div class="IEEE">
             <a href="#" class="join-btn">Join IEEE</a>
         </div>
-
     </div>
 </div>
