@@ -27,6 +27,7 @@ html {
     height: 100vh;
     width: 100%;
     background: url('./images/test.png') no-repeat center center/cover;
+    background-attachment: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -97,64 +98,93 @@ html {
 
 /* About Section */
 .about-section {
-    flex: 0 0 55%;
     display: flex;
-    padding: 3vh 5vw;
-    gap: 40px;
+    align-items: center; /* Vertically centers the columns */
+    padding: 6rem 5vw; /* Increases vertical padding */
+    gap: 3rem;
     background-color: #ffffff;
+    flex-direction: row;
 }
 
-.left-column,
-.right-column {
+.about-section .left-column,
+.about-section .right-column {
     flex: 1;
+    padding: 20px;
 }
 
-.left-column h1 {
-    font-size: 36px;
+
+.about-section .left-column h1 {
+    font-size: 2.5rem; /* Slightly larger for impact */
     font-weight: bold;
+    color: var(--primary-color); /* Uses the primary color */
 }
 
-.left-column h2 {
-    font-size: 22px;
-    margin-top: 10px;
+.about-section .left-column h2 {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    font-weight: normal; /* Softer than the main heading */
 }
 
-.right-column p {
-    font-size: 16px;
-    line-height: 1.5;
-    margin-bottom: 15px;
+.about-section .right-column p {
+    font-size: 1rem;
+    line-height: 1.7; /* Increased line-height for readability */
+    margin-bottom: 1.5rem;
 }
 
-.right-column ul {
+.about-section .right-column ul {
     list-style: none;
     padding-left: 0;
 }
 
-.right-column li {
-    margin-bottom: 10px;
-    font-size: 16px;
+.about-section .right-column li {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: flex-start;
 }
 
-/* Stats Section */
+/* Styles the checkmark for a cleaner look */
+.about-section .right-column li::before {
+    content: '✔';
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-right: 10px;
+    margin-top: -2px;
+}
+
+/* --- Stats Section --- */
+/* Adds dividers and a subtle hover effect for a more dynamic feel. */
 .stats {
-    flex: 0 0 30%;
     background-color: var(--primary-color);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 160px;
+    gap: 5rem; /* Adjusted gap for better spacing */
     flex-wrap: wrap;
-    padding-bottom: 40px;
-    /* Bottom gap built-in */
+    padding: 2rem 2rem; /* Standardized padding */
+}
+
+.stat-box {
+    text-align: center;
+    position: relative; /* For pseudo-element positioning */
+    transition: transform 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: scale(1.05); /* Adds a slight zoom on hover */
 }
 
 .stat-box h3 {
-    font-size: 36px;
+    font-size: 3rem;
+    font-weight: bold;
 }
 
 .stat-box p {
-    font-size: 16px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.9;
 }
 
 /* Contact Section */
