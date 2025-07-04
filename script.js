@@ -208,5 +208,5 @@ document.addEventListener("DOMContentLoaded", function () {
   setupIntersectionObserver("#LogoBar", AnimateLogoBar, { threshold: 0.1, once: true });
 
   // Fetch and display people by roles
-  FetchPeopleByRoles();
+  // FetchPeopleByRoles();
 });
