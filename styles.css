@@ -160,7 +160,7 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5rem; /* Adjusted gap for better spacing */
+    gap: 6vw; /* Adjusted gap for better spacing */
     flex-wrap: wrap;
     padding: 2rem 2rem; /* Standardized padding */
 }
@@ -171,9 +171,9 @@ html {
     transition: transform 0.3s ease;
 }
 
-.stat-box:hover {
-    transform: scale(1.05); /* Adds a slight zoom on hover */
-}
+/* .stat-box:hover {
+    transform: scale(1.05);
+} */
 
 .stat-box h3 {
     font-size: 3rem;
