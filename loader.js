@@ -10,6 +10,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const navhold = document.querySelector(".navhold");
       const scrollThreshold = 50;
 
+      const currentPath =  window.location.pathname;
+      console.log("Current Path:", currentPath);
+      // Remove active from all redirect-links
+      document.querySelectorAll(".redirect-link").forEach((link) => {
+        link.classList.remove("active");
+      });
+      // Add active to the matching link
+      const activeLink = document.querySelector(
+        `.redirect-link[href="${currentPath}"]`
+      );
+      if (activeLink) {
+        activeLink.classList.add("active");
+      }
+
       hamburger.addEventListener("click", () => {
         hamburger.classList.toggle("active");
         navhold.classList.toggle("active");
