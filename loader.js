@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Load navbar from site root
-  fetch("./nav-bar.html")
+  fetch("/nav-bar.html")
     .then((res) => res.text())
     .then((data) => {
       document.getElementById("NavBar").innerHTML = data;
@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
   // Load footer from site root
-  fetch("./footer.html")
+  fetch("/footer.html")
     .then((res) => res.text())
     .then((data) => {
       document.getElementById("Footer").innerHTML = data;
