@@ -44,7 +44,7 @@ function CreateSocietySections(societies) {
             const card = document.createElement('div');
             card.className = 'person-card';
             card.innerHTML = `
-                <img class="person-photo" src="/images/execom_2025/${person.name}.png" onerror="this.onerror=null; this.src='/images/execom_2025/default.png';" alt="${person.name}" />
+                <img class="person-photo" src="/images/execom_2025/${person.photo_url || person.name.toLowerCase().split(' ')[0]}.png" onerror="this.onerror=null; this.src='/images/execom_2025/default.png';" alt="${person.name}" />
                 <div class="person-name">${person.name || ''}</div>
                 <div class="person-society">${person.society || societyName || ''}</div>
                 <div class="person-role">${person.role || ''}</div>
