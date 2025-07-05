@@ -12,8 +12,8 @@ const countUpConfig = {
   },
   members: {
     element: '.members',
-    endValue: 0,
-    duration: 3000,
+    endValue: 4,
+    duration: 1000,
     startDelay: 200
   },
   projects: {
@@ -24,8 +24,8 @@ const countUpConfig = {
   },
   events: {
     element: '.events',
-    endValue: 0,
-    duration: 2800,
+    endValue: 1,
+    duration: 800,
     startDelay: 600
   }
 };

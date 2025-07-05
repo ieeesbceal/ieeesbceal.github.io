@@ -6,26 +6,26 @@ let latestYear = null;
 const countUpConfig = {
   years: {
     element: '.years',
-    endValue: 10,
+    endValue: 5,
     duration: 2000, // milliseconds
     startDelay: 0   // delay before starting
   },
   members: {
     element: '.members',
-    endValue: 5000,
+    endValue: 115,
     duration: 3000,
     startDelay: 200
   },
   projects: {
     element: '.projects',
-    endValue: 900,
-    duration: 2500,
+    endValue: 8,
+    duration: 1500,
     startDelay: 400
   },
   events: {
     element: '.events',
-    endValue: 2000,
-    duration: 2800,
+    endValue: 24,
+    duration: 2000,
     startDelay: 600
   }
 };
