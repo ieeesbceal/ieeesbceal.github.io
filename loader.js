@@ -10,7 +10,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const navhold = document.querySelector(".navhold");
       const scrollThreshold = 50;
 
-      const currentPath =  window.location.pathname;
+      const currentPath = (() => {
+        const path = window.location.pathname;
+        const slashCount = (path.match(/\//g) || []).length;
+        console.log("Path:", path, "Slash Count:", slashCount);
+        if (slashCount === 1 || slashCount === 2) {
+          return path;
+        } else {
+          return path.split("/").slice(0, 2).join("/") + "/";
+        }
+      })();
       console.log("Current Path:", currentPath);
       // Remove active from all redirect-links
       document.querySelectorAll(".redirect-link").forEach((link) => {
