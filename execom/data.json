@@ -179,6 +179,38 @@
           "website": ""
         }
       ],
+      "EMBS": [
+        {
+          "year": 2025,
+          "name": "Haleel",
+          "role": "Chairperson",
+          "email": "",
+          "linkedin": "",
+          "instagram": "",
+          "github": "",
+          "website": ""
+        },
+        {
+          "year": 2025,
+          "name": "Member 2",
+          "role": "Vice Chair",
+          "email": "",
+          "linkedin": "",
+          "instagram": "",
+          "github": "",
+          "website": ""
+        },
+        {
+          "year": 2025,
+          "name": "Member 3",
+          "role": "Secretary",
+          "email": "",
+          "linkedin": "",
+          "instagram": "",
+          "github": "",
+          "website": ""
+        }
+      ],
       "SPS": [
         {
           "year": 2025,
