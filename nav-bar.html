@@ -1,0 +1,347 @@
+<style>
+    .nav-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        pointer-events: none;
+    }
+
+    .nav-bar {
+        background: rgba(255, 255, 255, 0.75);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 30vh;
+        width: 75%;
+        margin: 1vh auto;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        pointer-events: auto;
+        backdrop-filter: blur(10px);
+        transform-origin: center;
+    }
+
+    .nav-container.scrolled .nav-bar {
+        width: 100%;
+        margin: 0 auto;
+        border-radius: 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo {
+        background-color: #0055A4;
+        padding: 0 20px;
+        border-radius: 30vh 0 0 30vh;
+        height: 8vh;
+        display: flex;
+        align-items: center;
+        transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .nav-container.scrolled .logo {
+        border-radius: 0;
+    }
+
+    .logo img {
+        height: 3vh;
+        width: auto;
+    }
+    .logo a {
+        color: white;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    .navhold {
+        flex-grow: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 30px;
+        list-style: none;
+        font-weight: bold;
+        align-items: center;
+    }
+
+    .nav-links li {
+        position: relative;
+    }
+
+    .nav-links a {
+        text-decoration: none;
+        color: black;
+        font-size: 1rem;
+        padding: 10px 5px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .nav-links a::after {
+        content: '';
+        display: block;
+        width: 0;
+        height: 3px;
+        background: #FFA500;
+        transition: width 0.3s;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+    }
+
+    .nav-links a:hover::after,
+    .nav-links a.active::after {
+        width: 100%;
+    }
+
+    .dropdown {
+        position: relative;
+    }
+
+    .dropdown-menu {
+        position: absolute;
+        top: 120%;
+        left: 0;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        display: none;
+        flex-direction: column;
+        min-width: 200px;
+        border-radius: 10px;
+        padding: 8px 0;
+        z-index: 999;
+    }
+
+    @media (min-width: 1100px) {
+      .dropdown:hover .dropdown-menu {
+        display: flex;
+      }
+    }
+
+    .dropdown-menu li {
+        padding: 10px 20px;
+        list-style: none;
+        white-space: nowrap;
+        transition: background 0.3s;
+    }
+
+    .dropdown-menu li:hover {
+        background-color: #f5f5f5;
+    }
+
+    .dropdown-menu a {
+        color: #333;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .IEEE {
+        background-color: #0055A4;
+        height: 8vh;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        border-radius: 0 30vh 30vh 0;
+        transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .nav-container.scrolled .IEEE {
+        border-radius: 0;
+    }
+
+    .IEEE a.join-btn {
+        text-decoration: none;
+        color: white;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+    /* Hamburger Menu Styles */
+    .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        padding: 15px;
+        background: none;
+        border: none;
+        z-index: 1001;
+    }
+    .hamburger span {
+        width: 25px;
+        height: 3px;
+        background-color: #333;
+        margin: 3px 0;
+        transition: all 0.3s ease;
+        border-radius: 3px;
+    }
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(6.5px, 6.5px);
+    }
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6.5px, -6.5px);
+    }
+    /* Mobile Styles */
+    @media (max-width: 1100px) {
+        .nav-bar {
+            width: 100%;
+            border-radius: 0;
+            padding: 0;
+            margin: 0;
+            background: white;
+        }
+        .logo {
+            padding: 0 15px;
+            border-radius: 0;
+            background-color: transparent;
+        }
+        .logo img {
+            filter: invert(1);
+        }
+        .hamburger {
+            display: flex;
+            order: 2;
+        }
+        .IEEE {
+            display: none;
+            order: 3;
+            padding: 0 15px;
+            border-radius: 0;
+        }
+        .navhold {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            order: 4;
+        }
+        .navhold.active {
+            display: block;
+        }
+        .nav-links {
+            flex-direction: column;
+            gap: 0;
+            padding: 20px 0;
+            max-height: 95vh;
+            overflow-y: auto;
+        }
+        .nav-links li {
+            width: 100%;
+            text-align: center;
+        }
+        .nav-links a {
+            display: block;
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .nav-links a::after {
+            display: none;
+        }
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: rgba(255, 165, 0, 0.1);
+            color: #0055A4;
+        }
+        /* Mobile Dropdown Styles */
+        .dropdown-menu {
+            position: static;
+            background: rgba(240, 240, 240, 0.9);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 0;
+            display: none;
+            margin-top: 0;
+        }
+        .dropdown .dropdown-menu {
+            display: none;
+        }
+        .dropdown.active .dropdown-menu {
+            display: block;
+        }
+        .dropdown-menu li {
+            padding: 12px 40px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .dropdown-menu a {
+            color: #666;
+            font-weight: 400;
+            border: none;
+        }
+        .dropdown-menu li:hover {
+            background-color: rgba(0, 85, 164, 0.1);
+        }
+        /* Mobile scroll adjustments */
+        .nav-container.scrolled .navhold {
+            border-radius: 0;
+        }
+        .nav-container.scrolled .navhold.active {
+            display: block;
+        }
+    }
+    
+    @media (max-width: 1350px) and (min-width: 1100px) {
+        .nav-bar {
+            width: 90%;
+        }
+        .nav-links {
+            gap: 20px;
+        }
+        .nav-links a {
+            font-size: 0.9rem;
+        }
+    }
+</style>
+<div class="nav-container">
+    <div class="nav-bar">
+        <div class="logo">
+            <a href="/"><img src="/logos/white/IEEE-SB_CEAL_logo-white.png" alt=""></a>
+        </div>
+        <button class="hamburger" aria-label="Toggle navigation menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="navhold">
+            <ul class="nav-links">
+                <li><a class="redirect-link" href="/">Home</a></li>
+                <li><a class="redirect-link" href="/about/">About</a></li>
+                <li class="dropdown">
+                    <a href="/societies/" class="redirect-link dropdown-toggle">Societies <i class="fa fa-caret-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/societies/CS">Computer Society</a></li>
+                        <li><a href="/societies/EMBS">Engineering in Medicine and Biology Society</a></li>
+                        <li><a href="/societies/IAS">Industry Applications Society</a></li>
+                        <li><a href="/societies/PELS">Power Electronics Society</a></li>
+                        <li><a href="/societies/PES">Power and Energy Society</a></li>
+                        <li><a href="/societies/RAS">Robotics and Automation Society</a></li>
+                        <li><a href="/societies/SPS">Signal Processing Society</a></li>
+                        <li><a href="/societies/WIE">Women in Engineering</a></li>
+                    </ul>
+                </li>
+                <li><a class="redirect-link" href="/events/">Events</a></li>
+                <li><a class="redirect-link" href="/execom/">Execom</a></li>
+                <!-- <li class="dropdown">
+                    <a href="#" class="dropdown-toggle">Execom <i class="fa fa-caret-down"></i></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="/execom?year=2025">Execom 2025</a></li>
+                        <li><a href="/execom?year=2024">Execom 2024</a></li>
+                    </ul>
+                </li> -->
+                <li><a class="redirect-link" href="/gallery/">Gallery</a></li>
+                <li><a class="redirect-link" href="/resources/">Resources</a></li>
+            </ul>
+        </div>
+        <div class="IEEE">
+            <a href="#" class="join-btn">Join IEEE</a>
+        </div>
+    </div>
+</div>
