@@ -29,6 +29,7 @@ html {
     background-color: #ffffff;
     color: #333;
     overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 
 /* Landing Section */
@@ -145,6 +146,11 @@ html {
 
 #LogoBar img {
     opacity: 0;
+    filter: grayscale(100%);
+}
+
+#LogoBar img:hover {
+    filter: grayscale(0%);
 }
 
 /* About Section */
@@ -193,6 +199,10 @@ html {
     font-size: 1rem;
     line-height: 1.7; /* Increased line-height for readability */
     margin-bottom: 1.5rem;
+}
+
+.about-section .right-column img {
+    padding-bottom: 2vh;
 }
 
 .about-section .right-column ul {
