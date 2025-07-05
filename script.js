@@ -187,7 +187,7 @@ function AnimateLogoBar() {
   // Initially hide all logos
   logos.forEach((logo) => {
     logo.style.opacity = "0";
-    logo.style.transition = `opacity ${animationDuration}ms ease-in-out`;
+    logo.style.transition = `filter 0.3s ease-in-out, opacity ${animationDuration}ms ease-in-out`;
   });
 
   // Reveal logos one by one after the initial delay
