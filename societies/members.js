@@ -50,7 +50,7 @@ function CreateSocietySections(societies) {
             card.innerHTML = `
                 <img class="person-photo" src="/images/execom_2025/${person.photo_url || person.name.toLowerCase().split(' ')[0]}.png" onerror="this.onerror=null; this.src='/images/execom_2025/default.png';" alt="${person.name}" />
                 <div class="person-name">${toTitleCase(person.name || '')}</div>
-                <div class="person-society">${toUpperCase(person.society || societyName || '')}</div>
+                <div class="person-society">${person.society || societyName || ''}</div>
                 <div class="person-role">${toTitleCase(person.role || '')}</div>
                 <div class="person-contact">
                     ${person.email ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${person.email}" target="_blank" title="Mail"><i class="fa-solid fa-envelope"></i></a>` : ''}
