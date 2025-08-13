@@ -49,15 +49,17 @@ function CreateSocietySections(societies) {
             card.className = 'person-card';
             card.innerHTML = `
                 <img class="person-photo" src="/images/execom_2025/${person.photo_url || person.name.toLowerCase().split(' ')[0]}.png" onerror="this.onerror=null; this.src='/images/execom_2025/default.png';" alt="${person.name}" />
-                <div class="person-name">${person.name || ''}</div>
-                <div class="person-society">${person.society || societyName || ''}</div>
-                <div class="person-role">${person.role || ''}</div>
+                <div class="person-name">${toTitleCase(person.name || '')}</div>
+                <div class="person-society">${toUpperCase(person.society || societyName || '')}</div>
+                <div class="person-role">${toTitleCase(person.role || '')}</div>
                 <div class="person-contact">
-                    ${person.email ? `<a href="mailto:${person.email}" target="_blank" title="Mail"><i class="fa-solid fa-envelope"></i></a>` : ''}
-                    ${person.linkedin ? `<a href="https://linkedin.com/in/${person.linkedin}" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>` : ''}
-                    ${person.instagram ? `<a href="https://instagram.com/${person.instagram}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>` : ''}
-                    ${person.github ? `<a href="https://github.com/${person.github}" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>` : ''}
+                    ${person.email ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${person.email}" target="_blank" title="Mail"><i class="fa-solid fa-envelope"></i></a>` : ''}
+                    ${person.linkedin ? `<a href="${person.linkedin}" target="_blank" title="LinkedIn"><i class="fab fa-linkedin"></i></a>` : ''}
+                    ${person.instagram ? `<a href="${person.instagram}" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>` : ''}
+                    ${person.github ? `<a href="${person.github}" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>` : ''}
                     ${person.website ? `<a href="${person.website}" target="_blank" title="Website"><i class="fa-solid fa-globe"></i></a>` : ''}
+                    ${person.x ? `<a href="${person.x}" target="_blank" title="X"><i class="fab fa-x"></i></a>` : ''}
+                    ${person.facebook ? `<a href="${person.facebook}" target="_blank" title="Facebook"><i class="fab fa-facebook"></i></a>` : ''}
                 </div>
             `;
             societyContainer.appendChild(card);
