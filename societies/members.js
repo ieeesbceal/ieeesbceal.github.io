@@ -68,3 +68,10 @@ function CreateSocietySections(societies) {
     });
     observeCards();
 }
+
+function toTitleCase(str) {
+    if (!str) {
+      return ""
+  }
+  return str.toLowerCase().replace(/\b\w/g, s => s.toUpperCase());
+}
