@@ -46,22 +46,21 @@ AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic' });
 
     const schedule = {
         1: [
-            ['09:00', 'Gates open & check-in'],
-            ['11:00', 'Opening ceremony & welcome talk'],
-            ['13:00', 'Lunch (local cuisine)'],
-            ['15:00', 'Guided cultural walk & market'],
-            ['17:30', 'Workshop: traditional crafts'],
-            ['19:30', 'Sunset performance — dusk stage'],
-            ['21:30', 'Night DJ set']
+            ["8:15 AM - 9:00 AM", "Welcome & Registration"],
+            ["9:00 AM - 9:45 AM", "Grand Inauguration: Inspiring opening address"],
+            ["9:45 AM - 1:00 PM", "Expert-Led Specialized Tracks: Concurrent Sessions"],
+            ["1:00 PM - 2:30 PM", "Networking Luncheon: Lunch with fellow delegates"],
+            ["2:30 PM - 3:30 PM", "Interactive Networking Forum"],
+            ["3:30 PM - 5:00 PM", "Elevate Your Career: The Power of IEEE Membership"],
+            ["5:00 PM - 5:30 PM", "Closing Remarks of the Day"]
         ],
         2: [
-            ['07:00', 'Morning yoga & sunrise session'],
-            ['09:00', 'Breakfast & local market'],
-            ['11:00', 'Photography walk to ridgeline'],
-            ['13:00', 'Picnic lunch'],
-            ['16:00', 'Artist Q&A & masterclass'],
-            ['18:30', 'Main stage headline'],
-            ['21:00', 'Farewell bonfire & final set']
+            ["9:15 AM - 10:15 AM", "Sustainability in Every Thread: A Session by Naeth"],
+            ["10:15 AM - 12:15 PM", "Professional Development Workshops"],
+            ["12:15 PM - 1:30 PM", "Networking Lunch"],
+            ["1:30 PM - 3:30 PM", "Treasure Hunt: Interactive Team Challenge"],
+            ["4:00 PM - 5:25 PM", "Cultural Program & Showcase"],
+            ["5:25 PM - 6:00 PM", "Closing Ceremony & Vote of Thanks"]
         ]
     };
 

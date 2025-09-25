@@ -67,20 +67,16 @@ header {
 .desktop-nav ul {
   display: flex;
   gap: 24px;
-  /* more breathing room */
   list-style: none;
   margin: 0;
   padding: 0;
-  /* Glass Effect */
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 14px;
   padding: 12px 40px;
-  /* Depth */
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-  /* Smooth animation */
   transition: background 0.3s, box-shadow 0.3s;
 }
 
@@ -102,7 +98,6 @@ nav ul li a {
 
 nav ul li a:hover {
   color: #00c6ff;
-  /* accent color */
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.08);
 }
@@ -179,12 +174,12 @@ nav a:hover {
 }
 
 .parallax-layer.bg {
-  background-image: url('/images/jumagi.jpg');
+  background-image: url('/events/heavenia25/images/jumagi.jpg');
   filter: brightness(.56) saturate(.9) contrast(.95)
 }
 
 .parallax-layer.mid {
-  background-image: url('/images/forest.jpg');
+  background-image: url('/events/heavenia25/images/forest.jpg');
   opacity: .18;
   filter: blur(2px)
 }
@@ -192,7 +187,7 @@ nav a:hover {
 .leaf-overlay {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(0, 0, 0, .18), transparent 25%), url('/images/hunt.png');
+  background-image: radial-gradient(rgba(0, 0, 0, .18), transparent 25%), url('/events/heavenia25/images/hunt.png');
   background-size: cover;
   opacity: var(--leaf-opacity);
   mix-blend-mode: overlay;
@@ -463,13 +458,11 @@ footer {
 
 .social-icons a {
   color: var(--muted);
-  /* or #bbb */
   transition: color 0.3s, transform 0.2s;
 }
 
 .social-icons a:hover {
   color: #00c6ff;
-  /* your accent color */
   transform: scale(1.2);
 }
 
@@ -630,7 +623,6 @@ footer {
   line-height: 1.4;
 }
 
-/* Focus effect */
 .highlight-card:hover {
   transform: scale(1.2);
   z-index: 20;
@@ -645,7 +637,6 @@ footer {
   opacity: 1;
 }
 
-/* Blur other cards when hovering one */
 .carousel-track:hover .highlight-card {
   filter: blur(4px) brightness(0.7);
 }
@@ -654,7 +645,6 @@ footer {
   filter: none;
 }
 
-/* Infinite scroll animation */
 @keyframes scroll {
   from {
     transform: translateX(0);
@@ -665,7 +655,6 @@ footer {
   }
 }
 
-/* Pause on hover */
 .carousel:hover .carousel-track {
   animation-play-state: paused;
 }
@@ -680,9 +669,7 @@ footer {
 .highlight-card {
   position: relative;
   min-width: 360px;
-  /* was 280px */
   max-width: 380px;
-  /* bigger cards */
   border-radius: 18px;
   overflow: hidden;
   flex-shrink: 0;
@@ -693,13 +680,11 @@ footer {
 .highlight-card img {
   width: 100%;
   height: 260px;
-  /* was 200px → taller images */
   object-fit: cover;
   display: block;
   transition: transform 0.5s ease;
 }
 
-/* Keep hover effects */
 .highlight-card:hover {
   transform: scale(1.25);
   z-index: 20;
@@ -731,7 +716,6 @@ footer {
   .carousel-track {
     gap: 16px;
     animation-duration: 12s;
-    /* slightly faster */
   }
 
   .highlight-card {
@@ -820,7 +804,6 @@ footer {
   color: var(--accent);
 }
 
-/* Active states */
 .mobile-nav.active {
   right: 0;
 }
@@ -837,7 +820,6 @@ footer {
   transform: rotate(-45deg) translate(5px, -6px);
 }
 
-/* Show hamburger only on mobile */
 @media (max-width: 768px) {
   .desktop-nav {
     display: none;
