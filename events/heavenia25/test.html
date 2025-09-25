@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>HEAVENIA'25</title>
+
+        <!-- Fonts & AOS (Animate On Scroll) -->
+        <link
+            href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap"
+            rel="stylesheet">
+        <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+        <link rel="icon" type="image/png" href="/images/logo.png" />
+        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    </head>
+    <body>
+        <!-- Header -->
+        <header>
+
+            <div class="container nav">
+                <!-- Hamburger -->
+                <div class="hamburger" id="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <!-- Mobile Menu -->
+            <nav class="mobile-nav" id="mobileNav">
+                <ul>
+                    <li><a href="#highlights">Highlights</a></li>
+                    <li><a href="#schedule">Schedule</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#register">Register</a></li>
+                </ul>
+            </nav>
+            <div class="container nav desktop-nav" id="desktopNav">
+                <div class="logo">
+                    <a href="#home">
+                        <img src="/images/logo.png" alt="Heavenia Logo"
+                            style="height:50px;object-fit:contain;">
+                    </a>
+                </div>
+
+                <nav class="desktop-nav-menu">
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#schedule">Schedule</a></li>
+                        <li><a href="#highlights">Highlights</a></li>
+                        <li><a href="#register">Register</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- floating register -->
+        <div class="float-register">
+            <!-- <button class="pulse-btn pulse"
+                onclick="document.querySelector('#register').scrollIntoView({behavior:'smooth'})">Register
+                Now</button> -->
+            <!-- Legacy Video Section -->
+            <section class="legacy-videos">
+                <div class="video-box"
+                    data-video="#">
+                    <img src="/images/play.svg"
+                        alt="Legacy Video Thumbnail">
+                    <div class="play-overlay">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="play-icon" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+
+        <!-- HERO / Parallax -->
+        <section id="home" class="hero" aria-label="Hero">
+            <div class="parallax-layer bg" data-speed="0.22"
+                aria-hidden></div>
+            <div class="parallax-layer mid" data-speed="0.06"
+                aria-hidden></div>
+            <div class="leaf-overlay" aria-hidden></div>
+
+            <div class="container content" data-aos="fade-up"
+                data-aos-duration="900">
+                <div class="kicker">EXPERIENCE • NATURE • TECH </div>
+                <h1>HEAVENIA</h1>
+                <p class="lead">A 2-day immersive festival blending technology,
+                    nature and culture. It’s not just an event it’s a movement.
+                    From inspiring talks and hands-on workshops to electrifying
+                    cultural performances, fun activities, and endless
+                    networking, HEAVENIA is where ideas meet passion, and
+                    passion creates history.</p>
+
+                <div class="ctas">
+                    <button class="btn primary"
+                        onclick="document.querySelector('#register').scrollIntoView({behavior:'smooth'})">Register</button>
+                    <button class="btn"
+                        onclick="document.querySelector('#schedule').scrollIntoView({behavior:'smooth'})">See
+                        Schedule</button>
+                </div>
+
+                <div class="counters" style="margin-top:20px"
+                    data-aos="fade-up"
+                    data-aos-delay="220">
+                    <div class="counter">
+                        <div class="num" data-target="2">0</div>
+                        <div class="label">Days</div>
+                    </div>
+                    <div class="counter">
+                        <div class="num" data-target="10">0</div>
+                        <div class="label">Artists</div>
+                    </div>
+                    <div class="counter">
+                        <div class="num" data-target="200">0</div>
+                        <div class="label">Attendees</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MARQUEE -->
+        <section id="marquee" class="marquee-wrap" aria-hidden>
+            <div class="container">
+                <div class="marquee">
+                    <div class="track" style="display:flex">
+                        <p>Enter the Jungle • Discover HEAVENIA • Where
+                            Adventure Meets Music • The Spirit of Jumanji
+                            Awaits
+                            •</p>
+                        <p>Enter the Jungle • Discover HEAVENIA • Where
+                            Adventure Meets Music • The Spirit of Jumanji
+                            Awaits
+                            •</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCHEDULE (2 day) -->
+        <section id="schedule">
+            <div class="container" data-aos="fade-up">
+                <h2>EVENT SCHEDULE — 2 DAYS</h2>
+                <p class="lead-muted">Detailed daily timetable. Click a day
+                    to
+                    view hour-by-hour events.</p>
+
+                <div class="timetable-wrap" style="margin-top:18px">
+                    <div>
+                        <div class="tabs" role="tablist" aria-label="Days">
+                            <div class="tab active" data-day="1">Day 1 — Sept
+                                26</div>
+                            <div class="tab" data-day="2">Day 2 — Sept
+                                27</div>
+                        </div>
+
+                        <div class="tt-grid" id="timetableGrid">
+                            <!-- timetable rows inserted via JS -->
+                        </div>
+
+                        <!-- hour-by-hour (alternative view) inserted by JS -->
+                    </div>
+
+                    <aside class="media-panel" data-aos="fade-left">
+                        <img src="/images/jumagi.jpg" alt="stage"
+                            style="width:100%;height:220px;object-fit:cover;border-radius:8px">
+                        <div
+                            style="margin-top:12px;color:var(--muted)">Evening
+                            performances take place at the ridgeline
+                            amphitheater — bring a light jacket and your
+                            camera.</div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- HIGHLIGHTS / Event Cards -->
+        <section id="highlights" class="highlights-section">
+            <div class="container">
+                <h2 class="section-title">Event Highlights</h2>
+                <p class="section-subtitle">
+                    Performances, workshops, scenic discoveries — these are
+                    the
+                    moments you'll remember.
+                </p>
+
+                <div class="carousel">
+                    <div class="carousel-track" id="carouselTrack">
+                        <div class="highlight-card">
+                            <img src="/images/hunt.png" alt="Sunset Stage">
+                            <div class="overlay">
+                                <div class="overlay-gradient"></div>
+                                <div class="overlay-content">
+                                    <h3>Sunset Stage</h3>
+                                    <p>Mellow sets, lights and cinematic
+                                        visuals
+                                        as the sun dips below the ridge.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="highlight-card">
+                            <img src="/images/Gaming.png"
+                                alt="Local Market">
+                            <div class="overlay">
+                                <div class="overlay-gradient"></div>
+                                <div class="overlay-content">
+                                    <h3>Local Market</h3>
+                                    <p>Artisans, tasting stalls, and
+                                        workshops
+                                        hosted by local communities.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="highlight-card">
+                            <img src="/images/Offline Session.png"
+                                alt="Ridge Hikes">
+                            <div class="overlay">
+                                <div class="overlay-gradient"></div>
+                                <div class="overlay-content">
+                                    <h3>Ridge Hikes</h3>
+                                    <p>Guided morning hikes to panoramic
+                                        viewpoints for photographers and
+                                        early
+                                        birds.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="highlight-card">
+                            <img src="/images/show your talent.png"
+                                alt="Talent Showcase">
+                            <div class="overlay">
+                                <div class="overlay-gradient"></div>
+                                <div class="overlay-content">
+                                    <h3>Talent Showcase</h3>
+                                    <p>Watch incredible performances from
+                                        emerging artists and creators.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="highlight-card">
+                            <img src="/images/Talk Session.png"
+                                alt="Forest Exploration">
+                            <div class="overlay">
+                                <div class="overlay-gradient"></div>
+                                <div class="overlay-content">
+                                    <h3>Forest Exploration</h3>
+                                    <p>Discover hidden trails and the
+                                        natural beauty of the surrounding
+                                        forest.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="highlight-card">
+                            <img src="/images/techdebate.png"
+                                alt="Main Stage Performances">
+                            <div class="overlay">
+                                <div class="overlay-gradient"></div>
+                                <div class="overlay-content">
+                                    <h3>Main Stage Performances</h3>
+                                    <p>Experience electrifying live music
+                                        from top artists on the main
+                                        stage.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq">
+            <div class="container" data-aos="fade-up">
+                <h2>FAQ</h2>
+                <div class="faq">
+                    <div class="faq-item" tabindex="0">
+                        <h4>What should I bring? <span>+</span></h4>
+                        <p>Laptops for the workshops (not mandatory).
+                            any essientials for outdoor activities.
+                            A reusable water bottle is recommended.</p>
+                    </div>
+                    <div class="faq-item" tabindex="0">
+                        <h4>Are meals included? <span>+</span></h4>
+                        <p>Meals are included in the package.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- REGISTER -->
+        <section id="register">
+            <div class="container" data-aos="zoom-in">
+                <div class="register-tile">
+                    <h2>Join HEAVENIA</h2>
+                    <p class="lead-muted" style="padding-bottom: 20px;">Secure
+                        your spot for the ultimate
+                        2-day immersive festival.</p>
+                    <a class="btn primary"
+                        href="https://link.ieee.ceal.in/Heavenia25"
+                        target="_blank">Register Now</a>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- CONTACT & FOOTER -->
+        <section id="contact">
+
+            <div class="container" data-aos="fade-up">
+                <h2>CONTACT</h2>
+                <p class="lead-muted">
+                    <strong>Queries:</strong> <br>
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:+91954422093"
+                        onclick="copyNumber(event, '+91954422093')">Sivakumar M
+                        S: +91 95442 2093</a><br>
+
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:+91628229641"
+                        onclick="copyNumber(event, '+91628229641')">Pranav S:
+                        +91 62822 9641</a><br>
+
+                    <i class="fas fa-phone"></i>
+                    <a href="tel:+91859098673"
+                        onclick="copyNumber(event, '+91859098673')">Saranya A:
+                        +91 85909 8673</a>
+                </p>
+
+                <div
+                    style="display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:12px">
+
+                    <aside
+                        style="padding:18px;border-radius:8px;background:linear-gradient(180deg, rgba(255,255,255,.01), transparent);color:var(--muted)">
+                        <h4 style="margin:0">Event Office</h4>
+                        <p style="margin-top:8px">Organised by : IEEE SB CEAL •
+                            Email:• ieee@ceattingal.ac.in</p>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <footer
+            style="padding:50px 0;background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);border-top:1px solid rgba(255,255,255,.1)">
+            <div class="container"
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:30px;text-align:left">
+
+                <!-- Brand / Message -->
+                <div>
+                    <div
+                        style="font-weight:800;font-family:'Playfair Display',serif;font-size:22px">
+                        HEAVENIA
+                    </div> <p><i class="far fa-copyright"></i> <span
+                            id="year"></span> Train 303, IEEE. <br> All Rights
+                        Reserved.</p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 style="margin-bottom:10px;font-size:16px">Quick
+                        Links</h4>
+                    <ul
+                        style="list-style:none;padding:0;margin:0;line-height:1.8">
+                        <li><a href="#events"
+                                style="color:var(--muted);text-decoration:none;transition:.3s"
+                                onmouseover="this.style.color='#fff'"
+                                onmouseout="this.style.color='var(--muted)'">Heavenia
+                                Event Info</a></li>
+                        <li><a href="#highlights"
+                                style="color:var(--muted);text-decoration:none;transition:.3s"
+                                onmouseover="this.style.color='#fff'"
+                                onmouseout="this.style.color='var(--muted)'">Event
+                                Highlights</a></li>
+                        <li><a href="#club"
+                                style="color:var(--muted);text-decoration:none;transition:.3s"
+                                onmouseover="this.style.color='#fff'"
+                                onmouseout="this.style.color='var(--muted)'">IEEE
+                                Club Info</a></li>
+                        <li><a href="#contact"
+                                style="color:var(--muted);text-decoration:none;transition:.3s"
+                                onmouseover="this.style.color='#fff'"
+                                onmouseout="this.style.color='var(--muted)'">Contact
+                                Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Address -->
+                <div>
+                    <h4 style="margin-bottom:10px;font-size:16px">College
+                        Address</h4>
+                    <p
+                        style="color:var(--muted);font-size:14px;line-height:1.6">
+                        College of Engineering, Attingal <br>
+                        Near KSRTC Busstand, Attingal P.O, <br>
+                        Trivandurm, Pin - 695 101.
+                    </p>
+                </div>
+
+                <!-- Social Media -->
+                <div>
+                    <h4 style="margin-bottom:10px;font-size:16px">Follow
+                        Us</h4>
+                    <div class="social-icons"
+                        style="display:flex;gap:15px;font-size:20px">
+                        <a href="https://www.instagram.com/ieeesbceal/"
+                            aria-label="Instagram"><i
+                                class="fab fa-instagram"></i></a>
+                        <a href="https://www.youtube.com/@ieeesbceal"
+                            aria-label="YouTube"><i
+                                class="fab fa-youtube"></i></a>
+                        <a href="https://discord.gg/H2KXYJDH77"
+                            aria-label="Discord"><i
+                                class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div style="text-align:center;margin-top:30px">
+                <a href="#home"
+                    style="font-size:14px;color:var(--muted);text-decoration:none;transition:.3s"
+                    onmouseover="this.style.color='#fff'"
+                    onmouseout="this.style.color='var(--muted)'">
+                    ↑ Back to Top
+                </a>
+            </div>
+        </footer>
+
+        <!-- AOS & scripts -->
+        <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+
+        <script src="index.js"></script>
+    </body>
+</html>
