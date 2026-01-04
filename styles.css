@@ -115,7 +115,7 @@ html {
 }
 
 .explore-btn:hover {
-    
+
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 15px 40px rgba(0, 85, 164, 0.4);
     border-color: var(--accent);
@@ -156,8 +156,10 @@ html {
 /* About Section */
 .about-section {
     display: flex;
-    align-items: center; /* Vertically centers the columns */
-    padding: 6rem 5vw; /* Increases vertical padding */
+    align-items: center;
+    /* Vertically centers the columns */
+    padding: 6rem 5vw;
+    /* Increases vertical padding */
     gap: 3rem;
     background-color: #ffffff;
     flex-direction: row;
@@ -171,9 +173,11 @@ html {
 
 
 .about-section .left-column h1 {
-    font-size: 2.5rem; /* Slightly larger for impact */
+    font-size: 2.5rem;
+    /* Slightly larger for impact */
     font-weight: bold;
-    color: var(--primary); /* Uses the primary color */
+    color: var(--primary);
+    /* Uses the primary color */
 }
 
 .about-section .left-column h1::after {
@@ -192,12 +196,14 @@ html {
 .about-section .left-column h2 {
     font-size: 1.5rem;
     color: var(--text-dark);
-    font-weight: normal; /* Softer than the main heading */
+    font-weight: normal;
+    /* Softer than the main heading */
 }
 
 .about-section .right-column p {
     font-size: 1rem;
-    line-height: 1.7; /* Increased line-height for readability */
+    line-height: 1.7;
+    /* Increased line-height for readability */
     margin-bottom: 1.5rem;
 }
 
@@ -234,14 +240,17 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 6vw; /* Adjusted gap for better spacing */
+    gap: 6vw;
+    /* Adjusted gap for better spacing */
     flex-wrap: wrap;
-    padding: 2rem 2rem; /* Standardized padding */
+    padding: 2rem 2rem;
+    /* Standardized padding */
 }
 
 .stat-box {
     text-align: center;
-    position: relative; /* For pseudo-element positioning */
+    position: relative;
+    /* For pseudo-element positioning */
     transition: transform 0.3s ease;
 }
 
@@ -390,4 +399,77 @@ form submit {
     text-underline-offset: 8px;
     width: 50%;
     text-decoration-color: #FFC107;
+}
+
+/* Floating Rotating Button */
+.floating-button-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    background: var(--primary);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0, 85, 164, 0.3);
+    overflow: hidden;
+}
+
+.floating-button-container:hover {
+    transform: scale(1.1);
+}
+
+.rotating-text-wrapper {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    animation: rotateText 10s linear infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    opacity: 1;
+}
+
+.floating-button-container:hover .rotating-text-wrapper {
+    opacity: 0;
+}
+
+.rotating-text-wrapper svg {
+    width: 90%;
+    height: 90%;
+    fill: white;
+    font-weight: bold;
+    font-size: 23px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.center-button {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 30px;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.floating-button-container:hover .center-button {
+    opacity: 1;
+}
+
+@keyframes rotateText {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
