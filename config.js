@@ -1,5 +1,14 @@
+// Automatically use local Django backend when running locally (localhost / 127.0.0.1)
+const isLocalhost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname === ''
+);
+
 const CONFIG = {
-    API_BASE_URL: 'https://api-ieee.sreedevss.in/api'
+    API_BASE_URL: isLocalhost
+        ? 'http://127.0.0.1:8000/api'
+        : 'https://api-ieee.sreedevss.in/api'
 };
 
 window.FALLBACK_DATA = {

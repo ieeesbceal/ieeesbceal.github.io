@@ -1,0 +1,752 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IEEE Workbench — Superadmin</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('workbench_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <a href="./index.html" style="display: flex; align-items: center; gap: 0.85rem; text-decoration: none; color: inherit;">
+        <div style="background-color: var(--primary); padding: 6px 12px; border-radius: var(--radius-sm); display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0, 85, 164, 0.25);">
+          <img src="../logos/white/IEEE-SB_CEAL_logo-white.png" alt="IEEE SB CEAL" style="height: 22px; width: auto;" onerror="this.style.display='none'">
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">IEEE Workbench</span>
+          <span class="brand-subtitle">Executive Command Center</span>
+        </div>
+      </a>
+    </div>
+    <div class="nav-user">
+      <a href="/" class="btn btn-ghost btn-sm nav-desktop-item" style="text-decoration: none; display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary); margin-right: 0.25rem;">
+        <i class="fa-solid fa-house" style="font-size: 0.8rem;"></i> Main Site
+      </a>
+
+      <button id="themeToggleBtn" class="header-icon-btn nav-desktop-item" onclick="toggleWorkbenchTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+
+      <div class="notif-wrapper" style="position: relative;">
+        <button id="notifBellBtn" class="header-icon-btn" onclick="toggleNotificationPanel(event)" aria-label="Notifications" title="Notifications">
+          <i class="fa-solid fa-bell"></i>
+          <span id="headerNotifBadge" class="notif-badge" style="display: none;">0</span>
+        </button>
+        <div id="headerNotifDropdown" class="notif-dropdown">
+          <div class="notif-dropdown-header">
+            <div style="font-weight: 800; font-size: 0.88rem; display: flex; align-items: center; gap: 0.45rem;">
+              <i class="fa-solid fa-bell" style="color: var(--primary);"></i>
+              <span>Notifications</span>
+              <span id="notifDropdownCount" class="team-pill" style="font-size: 0.68rem; padding: 0.1rem 0.45rem;">0</span>
+            </div>
+            <div style="display: flex; gap: 0.35rem; align-items: center;">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="markAllNotificationsRead()" title="Mark all as read" style="font-size: 0.72rem; padding: 0.2rem 0.45rem;">
+                <i class="fa-solid fa-check-double"></i> Mark read
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="closeNotificationPanel()" style="font-size: 0.85rem; padding: 0.2rem 0.4rem;">&times;</button>
+            </div>
+          </div>
+          <div id="headerNotifList" class="notif-dropdown-list">
+            <div style="padding: 1.5rem; text-align: center; color: var(--text-tertiary); font-size: 0.82rem;">
+              Loading notifications...
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="user-profile-chip nav-desktop-item">
+        <div class="avatar-bubble" id="userAvatar">SA</div>
+        <span id="superadminName" style="font-weight: 600; font-size: 0.85rem;"></span>
+        <span class="badge badge-super" style="font-size: 0.65rem;">SUPERADMIN</span>
+      </div>
+      <button id="changePasswordBtn" class="btn btn-secondary btn-sm nav-desktop-item" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">Change Password</button>
+      <button id="logoutBtn" class="btn btn-ghost btn-sm nav-desktop-item">Sign Out</button>
+
+      <button id="mobileNavToggleBtn" class="mobile-hamburger-btn" onclick="toggleMobileNavDrawer()" aria-label="Toggle navigation menu">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-container">
+    
+    <!-- Mobile Active Section Bar -->
+    <div id="mobileActiveSectionBar" class="mobile-section-bar">
+      <div id="mobileActiveSectionTitle" class="mobile-section-indicator-title">
+        <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
+        <span>Task Assignment & Deliverables</span>
+      </div>
+      <button type="button" class="btn btn-secondary btn-xs" onclick="openMobileNavDrawer()" style="font-size: 0.75rem; padding: 0.3rem 0.65rem; display: flex; align-items: center; gap: 0.35rem;">
+        <i class="fa-solid fa-bars"></i>
+        <span>Sections</span>
+      </button>
+    </div>
+    
+    <div class="view-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 class="view-title" id="dashboardTitle">Executive Operations</h1>
+        <p class="view-subtitle" id="dashboardSubtitle">Manage technical chapters, assign team leads, and oversee deliverables across IEEE SB CEAL.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+        <button id="triggerCronBtn" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 0.45rem; font-weight: 600; padding: 0.5rem 0.85rem;">
+          <i class="fa-solid fa-arrows-rotate"></i> Run Overdue Scan
+        </button>
+        <button class="btn btn-primary btn-sm" onclick="openBroadcastModal()" style="display: flex; align-items: center; gap: 0.45rem; font-weight: 700; padding: 0.5rem 0.95rem; box-shadow: 0 4px 14px rgba(0, 85, 164, 0.25);">
+          <i class="fa-solid fa-bullhorn"></i> Send Broadcast / Message
+        </button>
+      </div>
+    </div>
+
+    <section class="alert-card" style="display: none;">
+      <div class="alert-card-header">
+        <div class="alert-heading">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          <span>Branch Overdue Alerts</span>
+          <span id="notifCountBadge" class="badge badge-super" style="display: none; padding: 0.15rem 0.5rem;"></span>
+        </div>
+      </div>
+      <div id="notificationsContainer" class="alert-list"></div>
+    </section>
+
+    <!-- Global Deliverables Board / New Task Assigning Section at Top -->
+    <section id="sectionDeliverables" style="margin-bottom: 2.25rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.2rem;">
+            <i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Global Deliverables Board
+          </h2>
+          <p style="font-size: 0.825rem; color: var(--text-secondary); margin: 0;">Assign to any member across any society or filter by specific chapters.</p>
+        </div>
+        <div class="team-filter-dropdown-wrapper" style="display: flex; align-items: center; gap: 0.6rem;">
+          <label for="teamFilterSelect" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin: 0; white-space: nowrap; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="fa-solid fa-filter" style="color: var(--primary);"></i> Filter Team:
+          </label>
+          <select class="form-control" id="teamFilterSelect" style="min-width: 220px; font-size: 0.85rem; font-weight: 600; padding: 0.45rem 0.85rem; border-radius: 8px; cursor: pointer;" onchange="filterByTeam(this.value ? this.value : null)">
+            <option value="">All Teams & Societies</option>
+          </select>
+          <div class="filter-bar" id="teamFilterBar" style="display: none;"></div>
+        </div>
+      </div>
+
+      <div class="kanban-grid">
+        
+        <section class="kanban-column">
+          <div class="column-header">
+            <div class="column-title">
+              <i class="fa-solid fa-plus-circle" style="color: var(--primary); margin-right: 0.35rem;"></i>
+              <span>New Deliverable</span>
+            </div>
+          </div>
+          <div class="column-body">
+            <form id="createTaskForm">
+              <div class="form-group">
+                <label>Task Title *</label>
+                <input type="text" id="taskTitle" class="form-control" placeholder="e.g. Design Hackathon Poster" required>
+              </div>
+
+              <div class="form-group">
+                <label>Assign To Member *</label>
+                <select id="assignTo" class="form-control" required></select>
+              </div>
+
+              <div class="form-group">
+                <label>Target Deadline *</label>
+                <input type="datetime-local" id="deadline" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label>Deliverable Guidelines</label>
+                <textarea id="taskDesc" class="form-control" rows="3" placeholder="Context, reference links, and milestones..."></textarea>
+              </div>
+
+              <div class="form-group checkbox-form-group" style="margin-top: -0.1rem; margin-bottom: 0.85rem;">
+                <label class="checkbox-inline-label" style="display: flex !important; justify-content: flex-start !important; align-items: center !important; gap: 0.45rem !important; width: fit-content !important; cursor: pointer; font-size: 0.825rem; font-weight: 600; color: var(--text-primary); text-transform: none; letter-spacing: 0; user-select: none; margin-bottom: 0.2rem;">
+                  <input type="checkbox" id="allowReassign" checked style="width: 16px; height: 16px; margin: 0; accent-color: var(--primary); cursor: pointer; flex-shrink: 0;">
+                  <span style="display: inline-flex; align-items: center; gap: 0.3rem;"><i class="fa-solid fa-user-pen" style="color: var(--primary);"></i> Allow Assignee to Reassign Deliverable</span>
+                </label>
+                <small style="display: block; font-size: 0.74rem; color: var(--text-tertiary); margin-left: 1.45rem; margin-top: 0.1rem; line-height: 1.35;">
+                  When enabled, assigned Admins or Team Leads have the option to reassign this deliverable to others.
+                </small>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Dispatch Task
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <section class="kanban-column">
+          <div class="column-header">
+            <div class="column-title">
+              <span>In-Progress</span>
+            </div>
+            <span id="pendingCount" class="counter-pill">0</span>
+          </div>
+          <div id="pendingTasks" class="column-body"></div>
+        </section>
+
+        <section class="kanban-column" id="finishedDeliverablesColumn">
+          <div class="column-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="column-title">
+              <i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 0.35rem;"></i>
+              <span>Finished Deliverables</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <button type="button" class="btn btn-ghost btn-xs" id="finishedHeaderViewAllBtn" onclick="openAllFinishedDeliverablesModal()" title="View all finished tasks" style="font-size: 0.72rem; padding: 0.2rem 0.5rem; display: none;">
+                <i class="fa-solid fa-expand"></i> View All
+              </button>
+              <span id="completedCount" class="counter-pill">0</span>
+            </div>
+          </div>
+          <div id="completedTasks" class="column-body"></div>
+        </section>
+
+      </div>
+    </section>
+
+    <section class="analytics-section" id="sectionAnalytics">
+      <div class="analytics-header">
+        <div class="analytics-title-group">
+          <h2><i class="fa-solid fa-chart-line" style="color: var(--primary); font-size: 1.15rem;"></i> Full Branch & Core Deliverables Analytics</h2>
+          <p>Club-wide tracking across all societies, lead chapters, and individual Execom members.</p>
+        </div>
+      </div>
+
+      <div class="analytics-grid">
+        <div class="metric-circle-card">
+          <div class="metric-circle-box">
+            <svg viewBox="0 0 140 140" class="metric-circle-svg">
+              <circle class="metric-circle-bg" cx="70" cy="70" r="54" />
+              <circle class="metric-circle-fill" id="superCircleMeter" cx="70" cy="70" r="54" />
+            </svg>
+            <div class="metric-circle-inner">
+              <span class="metric-circle-val" id="superCircleValue">0</span>
+              <span class="metric-circle-sub" id="superCircleLabel">Done</span>
+            </div>
+          </div>
+          <div class="metric-circle-caption" id="superCircleCaption">Branch Completion: 0%</div>
+        </div>
+
+        <div class="metric-stat-card">
+          <div class="metric-stat-top">
+            <div>
+              <div class="metric-stat-value" id="superStatOnTime">0</div>
+              <div class="metric-stat-label">Delivered On-Time</div>
+            </div>
+            <div class="metric-stat-icon on-time">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+          </div>
+          <div class="metric-stat-footnote">
+            <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; font-size: 0.68rem; font-weight: 700;">BEFORE DEADLINE</span>
+            <span id="superOnTimeRate" style="color: #059669; font-weight: 700; margin-left: 0.25rem;">0%</span>
+          </div>
+        </div>
+
+        <div class="metric-stat-card">
+          <div class="metric-stat-top">
+            <div>
+              <div class="metric-stat-value" id="superStatOverdue">0</div>
+              <div class="metric-stat-label">Tasks Overdue</div>
+            </div>
+            <div class="metric-stat-icon overdue">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+          </div>
+          <div class="metric-stat-footnote">
+            <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #d97706; font-size: 0.68rem; font-weight: 700;">BRANCH OVERDUE</span>
+            <span>Unresolved deliverables</span>
+          </div>
+        </div>
+
+        <div class="metric-stat-card">
+          <div class="metric-stat-top">
+            <div>
+              <div class="metric-stat-value" id="superStatMissed">0</div>
+              <div class="metric-stat-label">Tasks Missed</div>
+            </div>
+            <div class="metric-stat-icon missed">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+          </div>
+          <div class="metric-stat-footnote">
+            <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #dc2626; font-size: 0.68rem; font-weight: 700;">MISSED DEADLINE</span>
+            <span>Overdue or delivered late</span>
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </section>
+
+    <!-- Execom Member Progress Matrix (Collapsed by Default) -->
+    <section class="matrix-accordion-card" id="sectionMatrix" style="margin-bottom: 2.25rem;">
+      <div class="matrix-accordion-header" id="matrixAccordionHeader" onclick="toggleProgressMatrixCollapse()" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 1.15rem 1.35rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); transition: background 0.2s ease, border-color 0.2s ease;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="width: 36px; height: 36px; border-radius: 8px; background: rgba(0, 85, 164, 0.12); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1rem;">
+            <i class="fa-solid fa-ranking-star"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 0.98rem; font-weight: 800; color: var(--text-primary); margin: 0; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span>Execom Member Progress Matrix (How Many Tasks Each Done)</span>
+              <span id="matrixStatusBadge" class="badge" style="font-size: 0.65rem; background: var(--bg-surface-elevated); color: var(--text-secondary); padding: 0.15rem 0.5rem;">COLLAPSED</span>
+            </h3>
+            <span style="font-size: 0.75rem; color: var(--text-tertiary);" id="matrixHeaderSubtitle">Click to expand and view real-time progress circles per person</span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <button type="button" class="btn btn-secondary btn-xs" id="matrixToggleBtn" style="font-size: 0.75rem; padding: 0.35rem 0.75rem; display: flex; align-items: center; gap: 0.4rem; pointer-events: none;">
+            <span id="matrixToggleText">Expand</span>
+            <i class="fa-solid fa-chevron-down" id="matrixToggleIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="matrixContentArea" style="display: none; padding: 1.25rem 0.75rem 0.5rem;">
+        <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.85rem; flex-wrap: wrap; gap: 0.6rem;">
+          <div class="matrix-filter-controls">
+            <input type="text" id="matrixSearchInput" class="form-control" placeholder="Search member or role..." oninput="filterProgressMatrix('superMembersProgressGrid')" style="width: 200px; font-size: 0.8rem; padding: 0.35rem 0.65rem;">
+            <select id="matrixSocietyFilter" class="form-control" onchange="filterProgressMatrix('superMembersProgressGrid')" style="width: 175px; font-size: 0.8rem; padding: 0.35rem 0.65rem;">
+              <option value="">All Societies & SB</option>
+            </select>
+          </div>
+        </div>
+        <div id="superMembersProgressGrid" class="members-progress-grid"></div>
+      </div>
+    </section>
+
+    <div class="super-grid" id="superadminManagementGrid">
+      
+      <section class="kanban-column" style="min-height: auto;">
+        <div class="column-header execom-header-responsive">
+          <div class="column-title">
+            <span>Execom Members</span>
+          </div>
+          <div class="execom-search-add-wrap">
+            <input type="text" id="execomUsersSearch" class="form-control" placeholder="Search Execom members..." oninput="filterExecomUsersTable()">
+            <button class="btn btn-primary btn-sm btn-add-user" onclick="toggleAddUserForm()">
+              <i class="fa-solid fa-user-plus"></i>
+              <span>Add User</span>
+            </button>
+          </div>
+        </div>
+        <div class="column-body">
+          
+          <div id="addUserBox" class="add-user-box" style="display: none; margin-bottom: 1rem;">
+            <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.85rem; color: var(--primary);"><i class="fa-solid fa-user-plus" style="margin-right: 0.35rem;"></i> Create New User</h4>
+            <form id="createUserForm">
+              <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="newUsername" class="form-control" placeholder="e.g. dev_jane" required>
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <div class="password-input-wrap">
+                  <input type="password" id="newPassword" class="form-control" placeholder="Temporary password" required>
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('newPassword', this)" aria-label="Toggle password visibility" title="Show password">
+                    <i class="fa-solid fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Role</label>
+                <select id="newRole" class="form-control" required>
+                  <option value="superadmin">Superadmin</option>
+                  <option value="admin">Admin</option>
+                  <option value="team_lead">Team Lead</option>
+                  <option value="member">Member</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Assigned Team / Society</label>
+                <select id="newTeamId" class="form-control">
+                </select>
+              </div>
+              <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAddUserForm()">Cancel</button>
+                <button type="submit" class="btn btn-primary btn-sm">Save User</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="table-responsive-wrapper">
+            <table class="user-table">
+              <thead>
+                <tr>
+                  <th style="width: 32%; min-width: 170px;">User</th>
+                  <th style="width: 18%; min-width: 110px;">Role</th>
+                  <th style="width: 28%; min-width: 150px;">Assigned Team / Society</th>
+                  <th style="width: 22%; min-width: 120px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="kanban-column" style="min-height: auto;">
+        <div class="column-header">
+          <div class="column-title">
+            <span>Societies & Chapters</span>
+          </div>
+        </div>
+        <div class="column-body">
+          <div id="teamsContainer" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;"></div>
+
+          <form id="createTeamForm" style="border-top: 1px dashed var(--border-subtle); padding-top: 1rem;">
+            <h4 style="font-size: 0.88rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--primary);">+ Add New Society / Team</h4>
+            <div class="form-group">
+              <label>Name *</label>
+              <input type="text" id="teamNameInput" class="form-control" placeholder="e.g. CS, Robotics, Design" required>
+            </div>
+            <div class="form-group">
+              <label>Description / Purpose</label>
+              <input type="text" id="teamDescInput" class="form-control" placeholder="Core focus and activities">
+            </div>
+            <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;">Create Society</button>
+          </form>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <div id="editRoleModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <h3 class="modal-title">Edit Role & Team Assignment</h3>
+      <p class="modal-desc" id="modalUsernameHeading">Configure permissions</p>
+      
+      <form id="editRoleModalForm">
+        <div class="form-group">
+          <label>Assign Role</label>
+          <select id="modalUserRole" class="form-control" required>
+            <option value="superadmin">Superadmin</option>
+            <option value="admin">Admin</option>
+            <option value="team_lead">Team Lead</option>
+            <option value="member">Member</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Assign Society / Team</label>
+          <select id="modalUserTeam" class="form-control">
+          </select>
+        </div>
+
+        <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--border-subtle); display: flex; justify-content: space-between; align-items: center; gap: 0.75rem;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.84rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.35rem;">
+              <i class="fa-solid fa-key" style="color: var(--accent-amber);"></i> Reset to Default Password
+            </div>
+            <div style="font-size: 0.74rem; color: var(--text-secondary); margin-top: 0.15rem;">
+              Resets password to default formula (&lt;name&gt;ieesbceal). Member must choose a personal password on next login.
+            </div>
+          </div>
+          <button type="button" class="btn btn-warning btn-sm" onclick="superAdminResetUserPassword(currentEditingUserId)" style="white-space: nowrap; font-weight: 700; flex-shrink: 0;">
+            <i class="fa-solid fa-rotate-left"></i> Reset Password
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="changePasswordModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-lock" style="color: var(--primary);"></i> Change Password</h3>
+        <button type="button" class="modal-close-btn" onclick="closeChangePasswordModal()">&times;</button>
+      </div>
+      <p class="modal-desc" id="changePasswordModalDesc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Choose a personal password for your IEEE Workbench account.
+      </p>
+      <form id="changePasswordForm">
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.35rem;">New Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="modalNewPassword" class="form-control" placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('modalNewPassword', this)" aria-label="Toggle password visibility" title="Show password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.35rem;">Confirm New Password</label>
+          <div class="password-input-wrap">
+            <input type="password" id="modalConfirmPassword" class="form-control" placeholder="Re-enter new password" required minlength="6" autocomplete="new-password">
+            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('modalConfirmPassword', this)" aria-label="Toggle password visibility" title="Show password">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="modal-actions" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeChangePasswordModal()">Later</button>
+          <button type="submit" class="btn btn-primary btn-sm">Save Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="reworkModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-rotate-left" style="color: var(--accent-amber);"></i> Send Deliverable for Rework</h3>
+        <button type="button" class="modal-close-btn" onclick="closeReworkModal()">&times;</button>
+      </div>
+      <p class="modal-desc" style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1rem;">
+        Provide specific guidance on what needs revision so the assignee can rework and resubmit.
+      </p>
+      <form id="reworkModalForm">
+        <input type="hidden" id="reworkTaskId">
+        <input type="hidden" id="reworkRole">
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label class="form-label" style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Deliverable Title</label>
+          <div id="reworkTaskTitle" class="modal-preview-box"></div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label class="form-label" style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Assigned Member</label>
+          <div id="reworkTaskAssignee" style="font-weight: 600; color: var(--text-secondary); font-size: 0.84rem;"></div>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Rework Notes & Requirements *</label>
+          <textarea id="reworkNotesInput" class="form-control" rows="3" placeholder="Specify changes, corrections, or references needed..." required></textarea>
+        </div>
+        <div class="modal-actions" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeReworkModal()">Cancel</button>
+          <button type="submit" class="btn btn-warning btn-sm" style="background: #f59e0b; color: white; border: none; font-weight: 700;">
+            <i class="fa-solid fa-rotate-left" style="margin-right: 0.35rem;"></i> Send for Rework
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="reassignModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-user-pen" style="color: var(--primary);"></i> Reassign Deliverable</h3>
+        <button type="button" class="modal-close-btn" onclick="closeReassignModal()">&times;</button>
+      </div>
+      <p class="modal-desc" style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 1rem;">
+        Transfer this deliverable to another Execom member.
+      </p>
+      <form id="reassignModalForm">
+        <input type="hidden" id="reassignTaskId">
+        <input type="hidden" id="reassignRole">
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label class="form-label" style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Deliverable Title</label>
+          <div id="reassignTaskTitle" class="modal-preview-box"></div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.75rem;">
+          <label class="form-label" style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Select New Assignee *</label>
+          <select id="reassignSelectAssignee" class="form-control" required>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">Handover Note (Optional)</label>
+          <textarea id="reassignNoteInput" class="form-control" rows="2" placeholder="Context or handover guidance for the new assignee..."></textarea>
+        </div>
+        <div class="modal-actions" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeReassignModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" style="font-weight: 700;">
+            <i class="fa-solid fa-user-check" style="margin-right: 0.35rem;"></i> Confirm Reassignment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="broadcastModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fa-solid fa-bullhorn" style="color: var(--primary);"></i> Send Message / Broadcast</h3>
+        <button type="button" class="modal-close-btn" onclick="closeBroadcastModal()">&times;</button>
+      </div>
+      <p class="modal-desc" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+        Dispatch a broadcast notice to the entire Execom, a specific chapter or team, or an individual member.
+      </p>
+      <form id="broadcastModalForm">
+        <div class="form-group" style="margin-bottom: 0.85rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.35rem;">Target Audience *</label>
+          <select id="broadcastTargetType" class="form-control" required onchange="handleBroadcastTargetChange()">
+            <option value="all">Entire Execom (All Members)</option>
+            <option value="society">Specific Society / Chapter</option>
+            <option value="team">Specific Student Branch Team</option>
+            <option value="member">Individual Execom Member</option>
+          </select>
+        </div>
+        <div class="form-group" id="broadcastTargetIdGroup" style="display: none; margin-bottom: 0.85rem;">
+          <label class="form-label" id="broadcastTargetIdLabel" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.35rem;">Select Target *</label>
+          <select id="broadcastTargetId" class="form-control">
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 1.25rem;">
+          <label class="form-label" style="display: block; font-size: 0.82rem; font-weight: 600; margin-bottom: 0.35rem;">Message Content *</label>
+          <textarea id="broadcastMessageText" class="form-control" rows="4" placeholder="Write your announcement or notice here..." required></textarea>
+        </div>
+        <div class="modal-actions" style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeBroadcastModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" style="display: flex; align-items: center; gap: 0.4rem; font-weight: 700;">
+            <i class="fa-solid fa-paper-plane"></i> Dispatch Message
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Member Performance Details Modal -->
+  <div id="memberPerformanceModal" class="modal-overlay">
+    <div class="modal-card member-perf-modal-card">
+      <div class="modal-header" style="margin-bottom: 0;">
+        <h3 class="modal-title" style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Execom Member Performance Profile
+        </h3>
+        <button type="button" class="modal-close-btn" onclick="closeMemberPerformanceModal()">&times;</button>
+      </div>
+      <div id="memberPerformanceModalBody">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- All Finished Deliverables Archive Modal -->
+  <div id="allFinishedDeliverablesModal" class="modal-overlay">
+    <div class="modal-card finished-modal-card">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.85rem; margin-bottom: 0.85rem;">
+        <div>
+          <h3 class="modal-title" style="display: flex; align-items: center; gap: 0.55rem; font-size: 1.15rem; margin: 0;">
+            <i class="fa-solid fa-circle-check" style="color: #10b981;"></i>
+            <span>All Finished Deliverables</span>
+            <span class="team-pill" id="allFinishedModalCountPill" style="font-size: 0.72rem; padding: 0.15rem 0.5rem;">0</span>
+          </h3>
+          <p class="modal-desc" style="margin: 0.25rem 0 0 0; font-size: 0.78rem; color: var(--text-tertiary);">
+            Archive of completed & verified deliverables with assigned member and assigning lead details.
+          </p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeAllFinishedDeliverablesModal()">&times;</button>
+      </div>
+
+      <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem;">
+        <div style="flex: 1; min-width: 220px; position: relative;">
+          <input type="text" id="allFinishedSearchInput" class="form-control" placeholder="Search by title, assigned member, or lead..." oninput="filterAllFinishedModalList()" style="font-size: 0.82rem; padding: 0.4rem 0.75rem;">
+        </div>
+        <div id="allFinishedSocietyFilterWrap">
+          <select id="allFinishedSocietyFilter" class="form-control" onchange="filterAllFinishedModalList()" style="font-size: 0.82rem; padding: 0.4rem 0.65rem; width: 180px;">
+            <option value="">All Societies & Teams</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="allFinishedModalList" class="finished-modal-body"></div>
+
+      <div style="display: flex; justify-content: flex-end; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; margin-top: 0.75rem;">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeAllFinishedDeliverablesModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Navigation Drawer -->
+  <div id="mobileNavDrawer" class="mobile-nav-drawer" onclick="handleDrawerBackdropClick(event)">
+    <div class="mobile-drawer-content">
+      <div class="mobile-drawer-header">
+        <div style="display: flex; align-items: center; gap: 0.6rem;">
+          <div style="background-color: var(--primary); padding: 5px 9px; border-radius: var(--radius-sm); display: flex; align-items: center;">
+            <img src="../logos/white/IEEE-SB_CEAL_logo-white.png" alt="IEEE SB CEAL" style="height: 18px; width: auto;" onerror="this.style.display='none'">
+          </div>
+          <span style="font-weight: 800; font-size: 0.95rem; color: var(--text-primary);">IEEE Workbench</span>
+        </div>
+        <button type="button" class="mobile-drawer-close-btn" onclick="closeMobileNavDrawer()" aria-label="Close menu">&times;</button>
+      </div>
+
+      <div class="mobile-drawer-user-card">
+        <div class="avatar-bubble" id="drawerUserAvatar" style="width: 44px; height: 44px; font-size: 1rem; font-weight: 800;">SA</div>
+        <div style="display: flex; flex-direction: column; min-width: 0;">
+          <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+            <span id="drawerUserName" style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary);">Superadmin</span>
+            <span id="drawerUserRoleBadge" class="badge badge-super" style="font-size: 0.62rem;">SUPERADMIN</span>
+          </div>
+          <span id="drawerUserSub" style="font-size: 0.72rem; color: var(--text-tertiary); margin-top: 0.15rem;">Executive Command Center</span>
+        </div>
+      </div>
+
+      <div class="mobile-drawer-nav-group">
+        <div class="mobile-drawer-heading">DASHBOARD SECTIONS</div>
+        <div class="mobile-drawer-links" id="drawerNavLinks">
+          <button type="button" class="mobile-nav-link is-active" data-section="deliverables" onclick="navigateWorkbenchSection('deliverables')">
+            <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
+            <span>Task Assigning & Deliverables</span>
+            <span class="badge" style="margin-left: auto; font-size: 0.65rem; background: rgba(0, 85, 164, 0.15); color: var(--primary);">Default</span>
+          </button>
+          <button type="button" class="mobile-nav-link" data-section="analytics" onclick="navigateWorkbenchSection('analytics')">
+            <i class="fa-solid fa-chart-line" style="color: #10b981;"></i>
+            <span>Branch Analytics</span>
+          </button>
+          <button type="button" class="mobile-nav-link" data-section="matrix" onclick="navigateWorkbenchSection('matrix')">
+            <i class="fa-solid fa-ranking-star" style="color: #f59e0b;"></i>
+            <span>Member Progress Matrix</span>
+          </button>
+          <button type="button" class="mobile-nav-link" id="drawerManageUsersLink" data-section="management" onclick="navigateWorkbenchSection('management')">
+            <i class="fa-solid fa-users-gear" style="color: #6366f1;"></i>
+            <span>Execom Management</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="mobile-drawer-nav-group">
+        <div class="mobile-drawer-heading">ACCOUNT & TOOLS</div>
+        <div class="mobile-drawer-links">
+          <a href="/" class="mobile-nav-link" style="text-decoration: none;">
+            <i class="fa-solid fa-house" style="color: var(--primary);"></i>
+            <span>Main Website</span>
+            <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.7rem; margin-left: auto; color: var(--text-tertiary);"></i>
+          </a>
+          <button type="button" class="mobile-nav-link" onclick="handleMobileThemeToggle()">
+            <i class="fa-solid fa-moon" id="drawerThemeIcon" style="color: #f59e0b;"></i>
+            <span id="drawerThemeText">Dark Mode</span>
+            <span class="badge" id="drawerThemeBadge" style="margin-left: auto; font-size: 0.68rem; background: var(--bg-surface-elevated); color: var(--text-secondary);">Current</span>
+          </button>
+          <button type="button" class="mobile-nav-link" onclick="handleMobileChangePassword()">
+            <i class="fa-solid fa-key" style="color: #6366f1;"></i>
+            <span>Change Password</span>
+          </button>
+          <button type="button" class="mobile-nav-link text-danger" onclick="logout()" style="color: #ef4444 !important;">
+            <i class="fa-solid fa-right-from-bracket" style="color: #ef4444;"></i>
+            <span>Sign Out</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../config.js"></script>
+  <script src="./app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', initSuperAdminDashboard);
+
+    function toggleAddUserForm() {
+      const box = document.getElementById('addUserBox');
+      const isHidden = box.style.display === 'none';
+      box.style.display = isHidden ? 'block' : 'none';
+      if (isHidden && typeof setupPasswordToggles === 'function') {
+        setupPasswordToggles();
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IEEE SB CEAL - Workbench</title>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script>
+    (function() {
+      const theme = localStorage.getItem('workbench_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    })();
+  </script>
+</head>
+<body>
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <a href="/" style="display: flex; align-items: center; gap: 0.85rem; text-decoration: none; color: inherit;">
+        <div style="background-color: var(--primary); padding: 6px 12px; border-radius: var(--radius-sm); display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0, 85, 164, 0.25);">
+          <img src="../logos/white/IEEE-SB_CEAL_logo-white.png" alt="IEEE SB CEAL" style="height: 22px; width: auto;" onerror="this.style.display='none'">
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">IEEE Workbench</span>
+          <span class="brand-subtitle">Execom Task System</span>
+        </div>
+      </a>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <button id="themeToggleBtn" class="header-icon-btn" onclick="toggleWorkbenchTheme()" aria-label="Toggle dark/light theme" title="Toggle theme">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+      <a href="/" class="btn btn-ghost btn-sm" style="text-decoration: none; display: flex; align-items: center; gap: 0.4rem; color: var(--text-secondary);">
+        <i class="fa-solid fa-house" style="font-size: 0.8rem;"></i> Main Website
+      </a>
+      <span class="team-pill">Django API Connected</span>
+    </div>
+  </header>
+
+  <main class="auth-page">
+    <div class="auth-wrapper">
+      
+      <div class="auth-card">
+        <div class="auth-header">
+          <h2>Execom Workspace</h2>
+          <p>Sign in to your IEEE SB CEAL team deliverables</p>
+        </div>
+
+        <div id="alertBox" class="alert-row login-alert-box" style="display: none; margin-bottom: 1.25rem;"></div>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" class="form-control" placeholder="Enter Execom username" required autofocus autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-input-wrap">
+              <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('password', this)" aria-label="Toggle password visibility" title="Show password">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.65rem; display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
+            <span>Continue to Workspace</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </main>
+
+  <script src="../config.js"></script>
+  <script src="./app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initLogin();
+    });
+  </script>
+</body>
+</html>
