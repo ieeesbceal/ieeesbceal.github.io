@@ -363,6 +363,12 @@ function initCustomDateTimePicker() {
         });
     }
 
+    if (deadlineInput && !deadlineInput.dataset.wired) {
+        deadlineInput.dataset.wired = 'true';
+        deadlineInput.addEventListener('change', updateCustomDtDisplay);
+        deadlineInput.addEventListener('input', updateCustomDtDisplay);
+    }
+
     if (deadlineInput && deadlineInput.value) {
         syncCustomDtStateFromInput();
     }
@@ -2091,6 +2097,15 @@ async function initAdminDashboard() {
         ? `Assign Chapter / Support Deliverable`
         : `Assign Task to ${teamTitle}`;
 
+    const matrixTitle = document.getElementById('adminMatrixTitle');
+    if (matrixTitle) {
+        matrixTitle.textContent = isSbc ? `${user.team_name || 'Chapter'} Progress Matrix` : 'Member Task Progress Matrix';
+    }
+    const matrixSearchInput = document.getElementById('adminMatrixSearchInput');
+    if (matrixSearchInput) {
+        matrixSearchInput.placeholder = isSbc ? `Search ${user.team_name || 'chapter'} member...` : 'Search team member...';
+    }
+
     document.getElementById('logoutBtn').addEventListener('click', logout);
     setupChangePasswordListeners();
     setupWorkflowModalListeners();
@@ -2167,9 +2182,9 @@ async function initAdminDashboard() {
                 } catch (e) {
                     await apiRequest('/trigger-cron-check/', 'POST');
                 }
-                await loadNotifications('team_lead');
-                await loadTasks('team_lead', user.team_id);
-                await loadAnalytics('team_lead');
+                await loadNotifications(normalized);
+                await loadTasks(normalized, user.team_id);
+                await loadAnalytics(normalized);
                 showToast('Overdue check completed!');
             } catch (err) {
                 showToast(err.message, 'error');
@@ -2265,7 +2280,7 @@ async function loadTasks(role, teamFilter = null) {
         const normRole = normalizeRole(role);
         if (normRole === 'superadmin' && teamFilter) {
             endpoint = `/tasks/?society=${teamFilter}&team_id=${teamFilter}`;
-        } else if (normRole === 'team_lead' && teamFilter) {
+        } else if ((normRole === 'team_lead' || normRole === 'sbc_lead') && teamFilter) {
             endpoint = `/tasks/?society=${teamFilter}&team_id=${teamFilter}`;
         }
 
@@ -2445,7 +2460,7 @@ async function loadTasks(role, teamFilter = null) {
                 let canReopen = false;
                 if (userRole === 'superadmin' || userRole === 'admin') {
                     canReopen = true;
-                } else if (userRole === 'team_lead') {
+                } else if (userRole === 'team_lead' || userRole === 'sbc_lead') {
                     const taskSocName = (teamLabel || '').toLowerCase();
                     const taskSocId = task.society_id || task.team_id;
                     if (userTeamId && taskSocId && Number(userTeamId) === Number(taskSocId)) {
@@ -2466,7 +2481,7 @@ async function loadTasks(role, teamFilter = null) {
                 }
             }
 
-            const canDelete = (role === 'superadmin' || role === 'admin' || role === 'team_lead');
+            const canDelete = (role === 'superadmin' || role === 'admin' || role === 'team_lead' || role === 'sbc_lead');
             const deleteBtnHtml = canDelete ? `
                 <button class="btn btn-ghost btn-sm" onclick="deleteTask(${task.id}, '${role}')" style="margin-top: 0.25rem; width: 100%; color: #dc2626; font-size: 0.74rem;">
                     Delete Deliverable
@@ -2733,11 +2748,11 @@ window.filterAllFinishedModalList = function() {
         const userTeamId = user ? user.team_id : null;
         const userTeamName = user ? (user.team_name || '').toLowerCase() : '';
 
-        // Superadmin and Admin can reopen any task; Team Lead can reopen their team's tasks
+        // Superadmin and Admin can reopen any task; Team Lead and SBC Lead can reopen their team's tasks
         let canReopen = false;
         if (userRole === 'superadmin' || userRole === 'admin') {
             canReopen = true;
-        } else if (userRole === 'team_lead') {
+        } else if (userRole === 'team_lead' || userRole === 'sbc_lead') {
             const taskSocName = (task.teamLabel || '').toLowerCase();
             const taskSocId = task.society_id || task.team_id;
             if (userTeamId && taskSocId && Number(userTeamId) === Number(taskSocId)) {
@@ -2755,7 +2770,7 @@ window.filterAllFinishedModalList = function() {
             </button>
         ` : '';
 
-        const canDelete = (currentTasksRole === 'superadmin' || currentTasksRole === 'admin' || currentTasksRole === 'team_lead');
+        const canDelete = (currentTasksRole === 'superadmin' || currentTasksRole === 'admin' || currentTasksRole === 'team_lead' || currentTasksRole === 'sbc_lead');
         const deleteBtn = canDelete ? `
             <button type="button" class="btn btn-ghost btn-xs" onclick="deleteTaskFromModal(${task.id})" style="color: #dc2626; font-size: 0.72rem; padding: 0.2rem 0.5rem;" title="Delete deliverable">
                 <i class="fa-solid fa-trash"></i> Delete
@@ -2863,7 +2878,7 @@ window.reopenDeliverable = async function(taskId) {
         showToast(`Deliverable #${taskId} reopened successfully and moved back to In-Progress.`);
         const user = getStoredUser();
         const role = user ? normalizeRole(user.role, user) : 'superadmin';
-        const teamFilter = (role === 'team_lead') ? user.team_id : (window.superAdminCurrentTeamFilter || null);
+        const teamFilter = (role === 'team_lead' || role === 'sbc_lead') ? user.team_id : (window.superAdminCurrentTeamFilter || null);
 
         await Promise.all([
             loadTasks(role, teamFilter),
@@ -2895,10 +2910,10 @@ window.deleteTask = async function(taskId, role) {
             await loadTasks(normRole, superAdminCurrentTeamFilter);
             await loadAnalytics(normRole, superAdminCurrentTeamFilter);
             await loadNotifications(normRole);
-        } else if (normRole === 'team_lead') {
-            await loadTasks('team_lead', user?.team_id);
-            await loadAnalytics('team_lead');
-            await loadNotifications('team_lead');
+        } else if (normRole === 'team_lead' || normRole === 'sbc_lead') {
+            await loadTasks(normRole, user?.team_id);
+            await loadAnalytics(normRole);
+            await loadNotifications(normRole);
         } else {
             await loadTasks('member', null);
             await loadAnalytics('member');
@@ -2933,10 +2948,10 @@ window.completeTask = async function(taskId, role) {
             await loadTasks(normRole, superAdminCurrentTeamFilter);
             await loadAnalytics(normRole, superAdminCurrentTeamFilter);
             await loadNotifications(normRole);
-        } else if (normRole === 'team_lead') {
-            await loadTasks('team_lead', user?.team_id);
-            await loadAnalytics('team_lead');
-            await loadNotifications('team_lead');
+        } else if (normRole === 'team_lead' || normRole === 'sbc_lead') {
+            await loadTasks(normRole, user?.team_id);
+            await loadAnalytics(normRole);
+            await loadNotifications(normRole);
         } else {
             await loadTasks('member', null);
             await loadAnalytics('member');
@@ -2964,10 +2979,10 @@ window.verifyAndCloseTask = async function(taskId, taskTitle, role) {
             await loadTasks(normRole, superAdminCurrentTeamFilter);
             await loadAnalytics(normRole, superAdminCurrentTeamFilter);
             await loadNotifications(normRole);
-        } else if (normRole === 'team_lead') {
-            await loadTasks('team_lead', user?.team_id);
-            await loadAnalytics('team_lead');
-            await loadNotifications('team_lead');
+        } else if (normRole === 'team_lead' || normRole === 'sbc_lead') {
+            await loadTasks(normRole, user?.team_id);
+            await loadAnalytics(normRole);
+            await loadNotifications(normRole);
         } else {
             await loadTasks('member', null);
             await loadAnalytics('member');
@@ -3047,6 +3062,11 @@ async function populateReassignDropdown(currentAssigneeId, teamId, role) {
             if (currentUser && (m.id == currentUser.id || m.username == currentUser.username || m.name == currentUser.username || m.name == currentUser.name)) {
                 return;
             }
+            const socName = (m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '').toLowerCase();
+            const rTitle = (m.role || m.position || '').toLowerCase();
+            if (socName.includes('professional') || rTitle.includes('counsellor') || rTitle.includes('counselor') || rTitle.includes('advisor') || rTitle.includes('mentor')) {
+                return;
+            }
             // Disallow SBC Leads from assigning to SB Core Officers (SB Chair, Vice Chair, Secretary, Treasurer, Joint Secretary)
             if (currentUser && normalizeRole(currentUser.role, currentUser) === 'sbc_lead') {
                 const isSbCeal = socName.includes('sb ceal') || socName === 'ieee sb ceal';
@@ -3054,11 +3074,6 @@ async function populateReassignDropdown(currentAssigneeId, teamId, role) {
                 if (isSbCeal && isSbOfficer) {
                     return;
                 }
-            }
-            const socName = (m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '').toLowerCase();
-            const rTitle = (m.role || m.position || '').toLowerCase();
-            if (socName.includes('professional') || rTitle.includes('counsellor') || rTitle.includes('counselor') || rTitle.includes('advisor') || rTitle.includes('mentor')) {
-                return;
             }
             const opt = document.createElement('option');
             opt.value = m.id;
@@ -3102,10 +3117,10 @@ function setupWorkflowModalListeners() {
                     await loadTasks('superadmin', superAdminCurrentTeamFilter);
                     await loadAnalytics('superadmin', superAdminCurrentTeamFilter);
                     await loadNotifications('superadmin');
-                } else if (normRole === 'team_lead') {
-                    await loadTasks('team_lead', user?.team_id);
-                    await loadAnalytics('team_lead');
-                    await loadNotifications('team_lead');
+                } else if (normRole === 'team_lead' || normRole === 'sbc_lead') {
+                    await loadTasks(normRole, user?.team_id);
+                    await loadAnalytics(normRole);
+                    await loadNotifications(normRole);
                 } else {
                     await loadTasks('member', null);
                     await loadAnalytics('member');
@@ -3146,10 +3161,10 @@ function setupWorkflowModalListeners() {
                     await loadTasks('superadmin', superAdminCurrentTeamFilter);
                     await loadAnalytics('superadmin', superAdminCurrentTeamFilter);
                     await loadNotifications('superadmin');
-                } else if (normRole === 'team_lead') {
-                    await loadTasks('team_lead', user?.team_id);
-                    await loadAnalytics('team_lead');
-                    await loadNotifications('team_lead');
+                } else if (normRole === 'team_lead' || normRole === 'sbc_lead') {
+                    await loadTasks(normRole, user?.team_id);
+                    await loadAnalytics(normRole);
+                    await loadNotifications(normRole);
                 } else {
                     await loadTasks('member', null);
                     await loadAnalytics('member');
@@ -3674,7 +3689,7 @@ async function loadAnalytics(role, filterTeamId = null) {
             if (overdueEl) overdueEl.textContent = personal.overdue || 0;
             if (missedEl) missedEl.textContent = personal.missed || 0;
 
-        } else if (normRole === 'team_lead') {
+        } else if (normRole === 'team_lead' || normRole === 'sbc_lead') {
             const valEl = document.getElementById('adminCircleValue');
             const lblEl = document.getElementById('adminCircleLabel');
             const capEl = document.getElementById('adminCircleCaption');
@@ -3691,7 +3706,8 @@ async function loadAnalytics(role, filterTeamId = null) {
 
             if (valEl) valEl.textContent = completed;
             if (lblEl) lblEl.textContent = completed === 1 ? 'Item' : 'Items';
-            if (capEl) capEl.textContent = `Team: ${completed} of ${total} Done (${compRate}%)`;
+            const scopeLabel = normRole === 'sbc_lead' ? (user?.team_name ? `${user.team_name} Chapter` : 'Chapter') : 'Team';
+            if (capEl) capEl.textContent = `${scopeLabel}: ${completed} of ${total} Done (${compRate}%)`;
             setCircleMeter('adminCircleMeter', compRate);
 
             if (onTimeEl) onTimeEl.textContent = source.completed_on_time || 0;
@@ -3703,7 +3719,10 @@ async function loadAnalytics(role, filterTeamId = null) {
                 gridEl.innerHTML = '';
                 const members = team.members || [];
                 if (members.length === 0) {
-                    gridEl.innerHTML = '<div style="color: var(--text-tertiary); font-size: 0.85rem; padding: 1rem 0;">No team members registered yet.</div>';
+                    const noMembersMsg = normRole === 'sbc_lead'
+                        ? 'No chapter members registered yet.'
+                        : 'No team members registered yet.';
+                    gridEl.innerHTML = `<div style="color: var(--text-tertiary); font-size: 0.85rem; padding: 1rem 0;">${noMembersMsg}</div>`;
                 } else {
                     members.forEach(m => {
                         const card = createMemberProgressCard(m);

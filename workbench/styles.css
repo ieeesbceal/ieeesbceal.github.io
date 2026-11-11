@@ -3572,6 +3572,8 @@ textarea.form-control {
   text-overflow: ellipsis;
   white-space: nowrap;
   display: inline-block;
+  flex: 1;
+  min-width: 0;
 }
 
 .custom-dt-text.placeholder {
