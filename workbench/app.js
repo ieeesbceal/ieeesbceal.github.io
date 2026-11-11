@@ -94,7 +94,7 @@ function renderAuthRequiredScreen(targetDashboardTitle = 'Executive Workspace') 
 
 /**
  * Normalizes role string or Django user attributes to one of:
- * 'superadmin' | 'team_lead' | 'member'
+ * 'superadmin' | 'admin' | 'sbc_lead' | 'team_lead' | 'member'
  */
 function normalizeRole(role, userObj = {}) {
     if (userObj.is_superuser) return 'superadmin';
@@ -106,6 +106,9 @@ function normalizeRole(role, userObj = {}) {
     if (r === 'admin' || r === 'operations_admin' || r === 'executive_admin') {
         return 'admin';
     }
+    if (r === 'sbc_lead' || r === 'sbc lead' || r === 'sbc_chair' || r === 'sbc chair' || r === 'chapter chair') {
+        return 'sbc_lead';
+    }
     if (r === 'team_lead' || r === 'team lead' || r === 'lead' || r === 'chapter_lead' || r === 'chapter lead' || r === 'branch_admin' || r === 'branch admin') {
         return 'team_lead';
     }
@@ -115,7 +118,7 @@ function normalizeRole(role, userObj = {}) {
 function getDashboardForRole(role, userObj = {}) {
     const normalized = normalizeRole(role, userObj);
     if (normalized === 'superadmin' || normalized === 'admin') return './superadmin-dashboard.html';
-    if (normalized === 'team_lead') return './admin-dashboard.html';
+    if (normalized === 'sbc_lead' || normalized === 'team_lead') return './admin-dashboard.html';
     return './member-dashboard.html';
 }
 
@@ -313,6 +316,7 @@ function initCustomDateTimePicker() {
             customDtState.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             renderCustomDtCalendar();
             updateCustomDtPreview();
+            updateCustomDtDisplay();
         });
     }
 
@@ -640,7 +644,7 @@ function updateCustomDtDisplay() {
             displayVal = document.createElement('span');
             displayVal.id = 'customDtText';
             displayVal.className = 'custom-dt-text placeholder';
-            displayVal.textContent = 'Choose target deadline (12-hr)...';
+            displayVal.textContent = 'Select deadline (dd-mm-yyyy --:--)...';
             wrap.appendChild(displayVal);
         } else {
             return;
@@ -659,15 +663,15 @@ function updateCustomDtDisplay() {
         dt = getCustomDtCandidateDate();
     }
 
-    if (!dt || !customDtState.selectedDate) {
-        displayVal.textContent = 'Choose target deadline (12-hr)...';
+    if (!dt) {
+        displayVal.textContent = 'Select deadline (dd-mm-yyyy --:--)...';
         displayVal.classList.add('placeholder');
         return;
     }
 
     const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const mStr = monthNamesShort[dt.getMonth()];
-    const dStr = dt.getDate();
+    const dStr = String(dt.getDate()).padStart(2, '0');
     const yStr = dt.getFullYear();
     const h = dt.getHours();
     const h12 = h % 12 || 12;
@@ -687,7 +691,7 @@ function resetCustomDateTimePicker() {
     customDtState.selectedDate = null;
     const displayVal = document.getElementById('customDtText');
     if (displayVal) {
-        displayVal.textContent = 'Choose target deadline (12-hr)...';
+        displayVal.textContent = 'Select deadline (dd-mm-yyyy --:--)...';
         displayVal.classList.add('placeholder');
     }
     const previewEl = document.getElementById('customDtPreviewText');
@@ -1592,7 +1596,7 @@ async function loadSuperAdminUsers(viewerRole = 'superadmin') {
             // Member Row
             const roleStr = normalizeRole(u.role, u);
             const assignedTeamOrSociety = info.chapter || u.team_name || u.society_name || 'IEEE SB CEAL';
-            const positionStr = u.position || u.role || (roleStr === 'superadmin' ? 'Chairperson' : (roleStr === 'team_lead' ? 'Lead' : 'Member'));
+            const positionStr = u.position || u.role || (roleStr === 'superadmin' ? 'Chairperson' : (roleStr === 'sbc_lead' ? 'SBC Chair' : (roleStr === 'team_lead' ? 'Lead' : 'Member')));
             const displayName = u.name || u.username;
 
             let roleBadge = '<span class="badge badge-member"><span class="badge-dot"></span>Member</span>';
@@ -1600,6 +1604,8 @@ async function loadSuperAdminUsers(viewerRole = 'superadmin') {
                 roleBadge = '<span class="badge badge-super"><span class="badge-dot"></span>Superadmin</span>';
             } else if (roleStr === 'admin') {
                 roleBadge = '<span class="badge badge-admin"><span class="badge-dot"></span>Admin</span>';
+            } else if (roleStr === 'sbc_lead') {
+                roleBadge = '<span class="badge badge-sbc-lead"><span class="badge-dot"></span>SBC Lead</span>';
             } else if (roleStr === 'team_lead') {
                 roleBadge = '<span class="badge badge-admin"><span class="badge-dot"></span>Team Lead</span>';
             }
@@ -2055,22 +2061,27 @@ async function initAdminDashboard() {
     const user = getStoredUser();
     const normalized = user ? normalizeRole(user.role, user) : null;
 
-    if (!user || normalized !== 'team_lead') {
-        if (normalized === 'superadmin') {
+    if (!user || (normalized !== 'team_lead' && normalized !== 'sbc_lead')) {
+        if (normalized === 'superadmin' || normalized === 'admin') {
             window.location.href = './superadmin-dashboard.html';
             return;
         }
-        renderAuthRequiredScreen('Team Lead Workspace');
+        renderAuthRequiredScreen(normalized === 'sbc_lead' ? 'SBC Lead Workspace' : 'Team Lead Workspace');
         return;
     }
 
-    const teamTitle = user.team_name ? `${user.team_name} Team` : 'Team';
+    const isSbc = normalized === 'sbc_lead';
+    const teamTitle = user.team_name ? (isSbc ? `${user.team_name} Chapter` : `${user.team_name} Team`) : (isSbc ? 'SBC' : 'Team');
     document.getElementById('adminName').textContent = user.username;
     document.getElementById('userAvatar').textContent = getInitials(user.username);
-    document.getElementById('teamBadgeText').textContent = `${teamTitle} Lead`;
-    document.getElementById('dashboardTitle').textContent = `${teamTitle} Workspace`;
-    document.getElementById('dashboardSubtitle').textContent = `Manage deliverables and team tracking for ${teamTitle}.`;
-    document.getElementById('assignFormTitle').textContent = `Assign Task to ${teamTitle}`;
+    document.getElementById('teamBadgeText').textContent = isSbc ? `${user.team_name || 'SBC'} Lead` : `${teamTitle} Lead`;
+    document.getElementById('dashboardTitle').textContent = isSbc ? `${user.team_name || 'SBC'} Lead Workspace` : `${teamTitle} Workspace`;
+    document.getElementById('dashboardSubtitle').textContent = isSbc
+        ? `Assign deliverables across ${user.team_name || 'your chapter'} and central support teams.`
+        : `Manage deliverables and team tracking for ${teamTitle}.`;
+    document.getElementById('assignFormTitle').textContent = isSbc
+        ? `Assign Chapter / Support Deliverable`
+        : `Assign Task to ${teamTitle}`;
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
     setupChangePasswordListeners();
@@ -2081,9 +2092,9 @@ async function initAdminDashboard() {
 
     await Promise.all([
         loadTeamMemberDropdown(),
-        loadNotifications('team_lead'),
-        loadTasks('team_lead', user.team_id),
-        loadAnalytics('team_lead')
+        loadNotifications(normalized),
+        loadTasks(normalized, user.team_id),
+        loadAnalytics(normalized)
     ]);
 
     const taskForm = document.getElementById('createTaskForm');
@@ -2130,9 +2141,9 @@ async function initAdminDashboard() {
                 resetSearchableMemberSelect();
                 resetCustomDateTimePicker();
                 setupDeadlineConstraint();
-                await loadTasks('team_lead', user.team_id);
-                await loadAnalytics('team_lead');
-                showToast('Deliverable assigned to team member!');
+                await loadTasks(normalized, user.team_id);
+                await loadAnalytics(normalized);
+                showToast(isSbc ? 'Deliverable dispatched!' : 'Deliverable assigned to team member!');
             } catch (err) {
                 showToast(err.message, 'error');
             }
@@ -3930,9 +3941,11 @@ window.renderMemberPerformanceModal = function(data) {
     `;
 
     let roleBadge = '';
-    const normRole = (m.role || '').toLowerCase();
+    const normRole = normalizeRole(m.role || '');
     if (normRole === 'superadmin') {
         roleBadge = '<span class="badge badge-super"><i class="fa-solid fa-shield-halved"></i> SUPERADMIN</span>';
+    } else if (normRole === 'sbc_lead') {
+        roleBadge = '<span class="badge badge-sbc-lead"><i class="fa-solid fa-graduation-cap"></i> SBC LEAD</span>';
     } else if (normRole === 'team_lead' || normRole === 'admin') {
         roleBadge = '<span class="badge badge-admin"><i class="fa-solid fa-user-tie"></i> TEAM LEAD</span>';
     } else {
@@ -4273,6 +4286,10 @@ window.updateMobileDrawerProfile = function(user = null) {
             badgeEl.className = 'badge badge-admin';
             badgeEl.textContent = 'ADMIN';
             if (subEl) subEl.textContent = user.team_name ? `${user.team_name} Operations` : 'Operations Lead';
+        } else if (normRole === 'sbc_lead') {
+            badgeEl.className = 'badge badge-sbc-lead';
+            badgeEl.textContent = 'SBC LEAD';
+            if (subEl) subEl.textContent = user.team_name ? `${user.team_name} SBC Lead` : 'Chapter Chair';
         } else if (normRole === 'team_lead') {
             badgeEl.className = 'badge badge-lead';
             badgeEl.textContent = 'TEAM LEAD';
