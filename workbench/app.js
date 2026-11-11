@@ -68,6 +68,31 @@ function logout() {
 }
 
 /**
+ * Gracefully paints an access required screen before redirecting to sign-in.
+ * Ensures Lighthouse/crawlers and direct visitors get a valid First Contentful Paint (FCP).
+ */
+function renderAuthRequiredScreen(targetDashboardTitle = 'Executive Workspace') {
+    document.body.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg-main,#0b1120);color:var(--text-primary,#f8fafc);font-family:system-ui,-apple-system,sans-serif;padding:1.5rem;text-align:center;">
+            <div style="max-width:440px;width:100%;background:var(--bg-card,#1e293b);border:1px solid var(--border-subtle,#334155);border-radius:12px;padding:2.25rem 1.75rem;box-shadow:0 20px 40px rgba(0,0,0,0.35);">
+                <div style="width:56px;height:56px;border-radius:50%;background:rgba(14,165,233,0.15);color:#38bdf8;display:inline-flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1.2rem;">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 style="font-size:1.25rem;font-weight:700;margin:0 0 0.5rem 0;">Authentication Required</h2>
+                <p style="font-size:0.875rem;color:var(--text-secondary,#94a3b8);margin:0 0 1.5rem 0;line-height:1.5;">You need an active executive session to access the ${escapeHtml(targetDashboardTitle)}. Redirecting to sign in...</p>
+                <a href="./index.html" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:0.4rem;padding:0.65rem 1.25rem;font-weight:600;font-size:0.875rem;text-decoration:none;border-radius:6px;background:#0284c7;color:#fff;">
+                    <span>Continue to Workspace Sign-In</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    `;
+    setTimeout(() => {
+        window.location.href = './index.html';
+    }, 2000);
+}
+
+/**
  * Normalizes role string or Django user attributes to one of:
  * 'superadmin' | 'team_lead' | 'member'
  */
@@ -1053,7 +1078,7 @@ async function initSuperAdminDashboard() {
     const user = getStoredUser();
     const role = user ? normalizeRole(user.role, user) : null;
     if (!user || (role !== 'superadmin' && role !== 'admin')) {
-        window.location.href = './index.html';
+        renderAuthRequiredScreen('Superadmin Command Center');
         return;
     }
 
@@ -1993,7 +2018,7 @@ async function initAdminDashboard() {
             window.location.href = './superadmin-dashboard.html';
             return;
         }
-        window.location.href = './index.html';
+        renderAuthRequiredScreen('Team Lead Workspace');
         return;
     }
 
@@ -2129,7 +2154,7 @@ async function loadTeamMemberDropdown() {
 async function initMemberDashboard() {
     const user = getStoredUser();
     if (!user || normalizeRole(user.role, user) !== 'member') {
-        window.location.href = './index.html';
+        renderAuthRequiredScreen('Member Deliverables Workspace');
         return;
     }
 
