@@ -2040,6 +2040,14 @@ async function loadSuperAdminAssigneeDropdown() {
             if (currentUser && (m.id == currentUser.id || m.username == currentUser.username || m.name == currentUser.username || m.name == currentUser.name)) {
                 return;
             }
+            // Disallow SBC Leads from assigning to SB Core Officers (SB Chair, Vice Chair, Secretary, Treasurer, Joint Secretary)
+            if (currentUser && normalizeRole(currentUser.role, currentUser) === 'sbc_lead') {
+                const isSbCeal = socName.includes('sb ceal') || socName === 'ieee sb ceal';
+                const isSbOfficer = ['chairperson', 'chair', 'vice chair', 'vice chairperson', 'secretary', 'treasurer', 'joint secretary'].some(kw => rTitle.includes(kw));
+                if (isSbCeal && isSbOfficer) {
+                    return;
+                }
+            }
             const teamName = m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '';
             const displayName = m.name || m.username;
             assignees.push({
@@ -2186,6 +2194,14 @@ async function loadTeamMemberDropdown() {
             // Disallow self-assignment
             if (currentUser && (m.id == currentUser.id || m.username == currentUser.username || m.name == currentUser.username || m.name == currentUser.name)) {
                 return;
+            }
+            // Disallow SBC Leads from assigning to SB Core Officers (SB Chair, Vice Chair, Secretary, Treasurer, Joint Secretary)
+            if (currentUser && normalizeRole(currentUser.role, currentUser) === 'sbc_lead') {
+                const isSbCeal = socName.includes('sb ceal') || socName === 'ieee sb ceal';
+                const isSbOfficer = ['chairperson', 'chair', 'vice chair', 'vice chairperson', 'secretary', 'treasurer', 'joint secretary'].some(kw => rTitle.includes(kw));
+                if (isSbCeal && isSbOfficer) {
+                    return;
+                }
             }
             const teamName = m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '';
             const displayName = m.name || m.username;
@@ -3030,6 +3046,14 @@ async function populateReassignDropdown(currentAssigneeId, teamId, role) {
             // Disallow self-assignment
             if (currentUser && (m.id == currentUser.id || m.username == currentUser.username || m.name == currentUser.username || m.name == currentUser.name)) {
                 return;
+            }
+            // Disallow SBC Leads from assigning to SB Core Officers (SB Chair, Vice Chair, Secretary, Treasurer, Joint Secretary)
+            if (currentUser && normalizeRole(currentUser.role, currentUser) === 'sbc_lead') {
+                const isSbCeal = socName.includes('sb ceal') || socName === 'ieee sb ceal';
+                const isSbOfficer = ['chairperson', 'chair', 'vice chair', 'vice chairperson', 'secretary', 'treasurer', 'joint secretary'].some(kw => rTitle.includes(kw));
+                if (isSbCeal && isSbOfficer) {
+                    return;
+                }
             }
             const socName = (m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '').toLowerCase();
             const rTitle = (m.role || m.position || '').toLowerCase();
