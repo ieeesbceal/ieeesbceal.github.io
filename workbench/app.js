@@ -3648,6 +3648,7 @@ window.filterProgressMatrix = function(gridElId = 'superMembersProgressGrid', se
 
 async function loadAnalytics(role, filterTeamId = null) {
     try {
+        const user = getStoredUser();
         let resData = null;
         try {
             resData = await apiRequest('/workbench/analytics/');
@@ -3660,7 +3661,7 @@ async function loadAnalytics(role, filterTeamId = null) {
         const team = resData.team || {};
         const club = resData.club_wide || {};
 
-        const normRole = normalizeRole(role);
+        const normRole = normalizeRole(role, user);
 
         if (normRole === 'member') {
             const valEl = document.getElementById('memberCircleValue');
@@ -3702,7 +3703,10 @@ async function loadAnalytics(role, filterTeamId = null) {
 
             if (valEl) valEl.textContent = completed;
             if (lblEl) lblEl.textContent = completed === 1 ? 'Item' : 'Items';
-            const scopeLabel = normRole === 'sbc_lead' ? (user?.team_name ? `${user.team_name} Chapter` : 'Chapter') : 'Team';
+            const currentTeamName = user?.team_name || team?.team_name || '';
+            const scopeLabel = normRole === 'sbc_lead'
+                ? (currentTeamName ? `${currentTeamName} Chapter` : 'Chapter')
+                : (currentTeamName ? `${currentTeamName} Team` : 'Team');
             if (capEl) capEl.textContent = `${scopeLabel}: ${completed} of ${total} Done (${compRate}%)`;
             setCircleMeter('adminCircleMeter', compRate);
 
