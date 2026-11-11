@@ -53,8 +53,8 @@
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: all 0.08s ease-out;
+  --transition-normal: all 0.12s ease-out;
 }
 
 * {
@@ -722,7 +722,7 @@ textarea.form-control {
   padding: 1.25rem;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.1s ease-out;
 }
 
 .modal-overlay.active {
@@ -740,8 +740,8 @@ textarea.form-control {
   max-width: 440px;
   padding: 1.75rem 2rem;
   box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.05);
-  transform: translateY(20px) scale(0.98);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(6px) scale(0.99);
+  transition: transform 0.1s ease-out;
   position: relative;
   z-index: 1000;
 }
@@ -1608,7 +1608,7 @@ textarea.form-control {
   display: none;
   flex-direction: column;
   overflow: hidden;
-  animation: notifFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: notifFade 0.08s ease-out;
 }
 
 .notif-dropdown.active {
@@ -1616,8 +1616,8 @@ textarea.form-control {
 }
 
 @keyframes notifFade {
-  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .notif-dropdown-header {
@@ -3542,6 +3542,16 @@ textarea.form-control {
   gap: 0.45rem;
   font-weight: 500;
   color: var(--text-primary);
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.custom-dt-text {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.88rem;
 }
 
 .custom-dt-text.placeholder {
@@ -3552,7 +3562,7 @@ textarea.form-control {
 .custom-dt-chevron {
   font-size: 0.85rem;
   color: var(--primary);
-  transition: transform 0.2s ease;
+  transition: transform 0.08s ease;
 }
 
 .custom-dt-picker.is-open .custom-dt-chevron {
@@ -3572,7 +3582,7 @@ textarea.form-control {
   width: 420px;
   max-width: calc(100vw - 2rem);
   overflow: hidden;
-  animation: dtFadeInDown 0.2s ease-out;
+  animation: dtFadeInDown 0.08s ease-out;
 }
 
 [data-theme="dark"] .custom-dt-dropdown {
@@ -3584,7 +3594,7 @@ textarea.form-control {
 @keyframes dtFadeInDown {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
@@ -3813,7 +3823,7 @@ textarea.form-control {
   cursor: pointer;
   margin-bottom: 2px;
   user-select: none;
-  transition: all 0.12s ease;
+  transition: all 0.05s ease;
 }
 
 .dt-slider-item:hover:not(.selected) {
@@ -4162,7 +4172,7 @@ textarea.form-control {
   font-size: 0.78rem;
   color: var(--text-tertiary);
   pointer-events: none;
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition: transform 0.08s ease, color 0.08s ease;
   z-index: 2;
 }
 
@@ -4184,7 +4194,7 @@ textarea.form-control {
   max-height: 250px;
   overflow-y: auto;
   scrollbar-width: thin;
-  animation: dtFadeInDown 0.18s ease-out;
+  animation: dtFadeInDown 0.08s ease-out;
 }
 
 [data-theme="dark"] .searchable-select-dropdown {
@@ -4209,7 +4219,7 @@ textarea.form-control {
   color: var(--text-primary);
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   user-select: none;
-  transition: background 0.12s ease;
+  transition: background 0.05s ease;
 }
 
 [data-theme="dark"] .searchable-select-item {

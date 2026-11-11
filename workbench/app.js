@@ -211,6 +211,7 @@ function initCustomDateTimePicker() {
                 customDtState.selectedHour = h;
                 updateSliderActiveItem('hour', h, true);
                 updateCustomDtPreview();
+                updateCustomDtDisplay();
             });
             hourScroll.appendChild(item);
         }
@@ -228,6 +229,7 @@ function initCustomDateTimePicker() {
                 customDtState.selectedMinute = m;
                 updateSliderActiveItem('min', m, true);
                 updateCustomDtPreview();
+                updateCustomDtDisplay();
             });
             minScroll.appendChild(item);
         }
@@ -243,6 +245,7 @@ function initCustomDateTimePicker() {
                 customDtState.selectedAmPm = item.dataset.ampm;
                 updateSliderActiveItem('ampm', customDtState.selectedAmPm, true);
                 updateCustomDtPreview();
+                updateCustomDtDisplay();
             });
         });
     }
@@ -253,7 +256,7 @@ function initCustomDateTimePicker() {
         trigger.addEventListener('click', (e) => {
             e.stopPropagation();
             if (customDtState.isOpen) {
-                closeCustomDtDropdown();
+                closeCustomDtDropdown(true);
             } else {
                 openCustomDtDropdown();
             }
@@ -262,12 +265,12 @@ function initCustomDateTimePicker() {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 if (customDtState.isOpen) {
-                    closeCustomDtDropdown();
+                    closeCustomDtDropdown(true);
                 } else {
                     openCustomDtDropdown();
                 }
             } else if (e.key === 'Escape') {
-                closeCustomDtDropdown();
+                closeCustomDtDropdown(false);
             }
         });
     }
@@ -327,7 +330,7 @@ function initCustomDateTimePicker() {
         cancelBtn.dataset.wired = 'true';
         cancelBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            closeCustomDtDropdown();
+            closeCustomDtDropdown(false);
         });
     }
 
@@ -346,20 +349,20 @@ function initCustomDateTimePicker() {
         document.addEventListener('click', (e) => {
             const p = document.getElementById('customDtPicker');
             if (p && !p.contains(e.target) && customDtState.isOpen) {
-                closeCustomDtDropdown();
+                closeCustomDtDropdown(true);
             }
         });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && customDtState.isOpen) {
-                closeCustomDtDropdown();
+                closeCustomDtDropdown(false);
             }
         });
     }
 
     if (deadlineInput && deadlineInput.value) {
         syncCustomDtStateFromInput();
-        updateCustomDtDisplay();
     }
+    updateCustomDtDisplay();
 }
 
 function syncCustomDtStateFromInput() {
@@ -405,16 +408,31 @@ function openCustomDtDropdown() {
     customDtState.isOpen = true;
 }
 
-function closeCustomDtDropdown() {
+function closeCustomDtDropdown(autoApply = false) {
     const dropdown = document.getElementById('customDtDropdown');
     const picker = document.getElementById('customDtPicker');
     const trigger = document.getElementById('customDtTrigger');
     if (!dropdown || !picker) return;
 
+    if (autoApply && customDtState.selectedDate) {
+        const dt = getCustomDtCandidateDate();
+        const minAllowed = new Date(Date.now() + 20 * 60 * 1000 - 30000);
+        if (dt && dt >= minAllowed) {
+            const pad = (n) => String(n).padStart(2, '0');
+            const isoLocal = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+            const deadlineInput = document.getElementById('deadline');
+            if (deadlineInput && deadlineInput.value !== isoLocal) {
+                deadlineInput.value = isoLocal;
+                deadlineInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+    }
+
     dropdown.style.display = 'none';
     picker.classList.remove('is-open');
     if (trigger) trigger.setAttribute('aria-expanded', 'false');
     customDtState.isOpen = false;
+    updateCustomDtDisplay();
 }
 
 function updateSliderActiveItem(type, val, scroll = false) {
@@ -445,10 +463,8 @@ function updateSliderActiveItem(type, val, scroll = false) {
     });
 
     if (scroll && targetEl) {
-        setTimeout(() => {
-            const offset = targetEl.offsetTop - (container.clientHeight / 2) + (targetEl.clientHeight / 2);
-            container.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
-        }, 15);
+        const offset = targetEl.offsetTop - (container.clientHeight / 2) + (targetEl.clientHeight / 2);
+        container.scrollTo({ top: Math.max(0, offset), behavior: 'auto' });
     }
 }
 
@@ -497,6 +513,7 @@ function renderCustomDtCalendar() {
                 customDtState.selectedDate = new Date(y, m, d);
                 renderCustomDtCalendar();
                 updateCustomDtPreview();
+                updateCustomDtDisplay();
             });
         }
 
@@ -612,15 +629,37 @@ function applyCustomDtSelection() {
     }
 
     updateCustomDtDisplay();
-    closeCustomDtDropdown();
+    closeCustomDtDropdown(false);
 }
 
 function updateCustomDtDisplay() {
-    const displayVal = document.getElementById('customDtText');
-    const dt = getCustomDtCandidateDate();
-    if (!displayVal) return;
+    let displayVal = document.getElementById('customDtText');
+    if (!displayVal) {
+        const wrap = document.querySelector('.custom-dt-display-val');
+        if (wrap) {
+            displayVal = document.createElement('span');
+            displayVal.id = 'customDtText';
+            displayVal.className = 'custom-dt-text placeholder';
+            displayVal.textContent = 'Choose target deadline (12-hr)...';
+            wrap.appendChild(displayVal);
+        } else {
+            return;
+        }
+    }
 
+    const deadlineInput = document.getElementById('deadline');
+    let dt = null;
+    if (deadlineInput && deadlineInput.value) {
+        const d = new Date(deadlineInput.value);
+        if (!isNaN(d.getTime())) {
+            dt = d;
+        }
+    }
     if (!dt) {
+        dt = getCustomDtCandidateDate();
+    }
+
+    if (!dt || !customDtState.selectedDate) {
         displayVal.textContent = 'Choose target deadline (12-hr)...';
         displayVal.classList.add('placeholder');
         return;
@@ -630,9 +669,12 @@ function updateCustomDtDisplay() {
     const mStr = monthNamesShort[dt.getMonth()];
     const dStr = dt.getDate();
     const yStr = dt.getFullYear();
-    const hStr = String(customDtState.selectedHour).padStart(2, '0');
-    const minStr = String(customDtState.selectedMinute).padStart(2, '0');
-    displayVal.textContent = `${mStr} ${dStr}, ${yStr}, ${hStr}:${minStr} ${customDtState.selectedAmPm}`;
+    const h = dt.getHours();
+    const h12 = h % 12 || 12;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hStr = String(h12).padStart(2, '0');
+    const minStr = String(dt.getMinutes()).padStart(2, '0');
+    displayVal.textContent = `${dStr} ${mStr} ${yStr}, ${hStr}:${minStr} ${ampm}`;
     displayVal.classList.remove('placeholder');
 }
 
@@ -652,7 +694,7 @@ function resetCustomDateTimePicker() {
     if (previewEl) previewEl.textContent = 'No deadline selected';
     const errHint = document.getElementById('customDtErrHint');
     if (errHint) errHint.style.display = 'none';
-    closeCustomDtDropdown();
+    closeCustomDtDropdown(false);
 }
 
 /**
