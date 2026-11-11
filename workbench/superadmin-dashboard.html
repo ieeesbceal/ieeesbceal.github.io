@@ -153,14 +153,91 @@
               </div>
 
               <div class="form-group">
-                <label>Assign To Member *</label>
-                <select id="assignTo" class="form-control" required></select>
+                <label for="assignToSearchInput">Assign To Member *</label>
+                <div class="searchable-select-wrap" id="assignToSearchWrap">
+                  <input type="hidden" id="assignTo" required>
+                  <div class="searchable-input-box">
+                    <i class="fa-solid fa-magnifying-glass search-select-icon"></i>
+                    <input type="text" id="assignToSearchInput" class="form-control searchable-select-input" placeholder="Type name or choose member..." autocomplete="off">
+                    <button type="button" class="search-select-clear-btn" id="assignToClearBtn" style="display: none;" title="Clear">&times;</button>
+                    <i class="fa-solid fa-chevron-down search-select-chevron" id="assignToChevron"></i>
+                  </div>
+                  <div class="searchable-select-dropdown" id="assignToDropdown" style="display: none;">
+                    <div class="searchable-select-list" id="assignToList"></div>
+                  </div>
+                </div>
               </div>
 
-              <div class="form-group">
+              <div class="form-group custom-dt-form-group">
                 <label>Target Deadline *</label>
-                <input type="datetime-local" id="deadline" class="form-control" required>
-                <small style="display: block; font-size: 0.74rem; color: var(--text-tertiary); margin-top: 0.25rem;"><i class="fa-solid fa-clock" style="margin-right: 0.25rem;"></i>Must be at least 20 minutes in the future.</small>
+                <div class="custom-dt-picker" id="customDtPicker">
+                  <input type="hidden" id="deadline" required>
+                  <div class="custom-dt-input-wrap" id="customDtTrigger" tabindex="0" role="button" aria-haspopup="dialog" aria-expanded="false">
+                    <span class="custom-dt-display-val">
+                      <i class="fa-regular fa-calendar-check" style="margin-right: 0.45rem; color: var(--primary);"></i>
+                    </span>
+                    <i class="fa-solid fa-clock-rotate-left custom-dt-chevron" style="color: var(--primary);"></i>
+                  </div>
+                  <small style="display: block; font-size: 0.74rem; color: var(--text-tertiary); margin-top: 0.25rem;"><i class="fa-solid fa-clock" style="margin-right: 0.25rem;"></i>12-hour format (Hour, Min, AM/PM) &bull; Minimum 20 minutes from now.</small>
+
+                  <!-- Custom Dropdown Popup matching 3 sliders -->
+                  <div class="custom-dt-dropdown" id="customDtDropdown" style="display: none;">
+                    <div class="custom-dt-body">
+                      <!-- Left: Calendar -->
+                      <div class="custom-dt-calendar-pane">
+                        <div class="dt-cal-header">
+                          <button type="button" class="dt-cal-nav-btn" id="dtCalPrevMonth" title="Previous Month"><i class="fa-solid fa-chevron-left"></i></button>
+                          <span class="dt-cal-month-year" id="dtCalMonthYear">November, 2026</span>
+                          <button type="button" class="dt-cal-nav-btn" id="dtCalNextMonth" title="Next Month"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="dt-cal-weekdays">
+                          <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                        </div>
+                        <div class="dt-cal-days-grid" id="dtCalDaysGrid"></div>
+                        <div class="dt-cal-footer">
+                          <button type="button" class="dt-cal-text-btn" id="dtCalClearBtn">Clear</button>
+                          <button type="button" class="dt-cal-text-btn" id="dtCalTodayBtn">Today</button>
+                        </div>
+                      </div>
+
+                      <!-- Right: 3 Sliders (Hours, Minutes, AM/PM) -->
+                      <div class="custom-dt-time-pane">
+                        <!-- Slider 1: Hours (01 - 12) -->
+                        <div class="dt-time-slider-col" id="dtSliderHourCol">
+                          <div class="dt-slider-header">Hour</div>
+                          <div class="dt-slider-scroll" id="dtSliderHourScroll"></div>
+                        </div>
+
+                        <!-- Slider 2: Minutes (00 - 59) -->
+                        <div class="dt-time-slider-col" id="dtSliderMinCol">
+                          <div class="dt-slider-header">Min</div>
+                          <div class="dt-slider-scroll" id="dtSliderMinScroll"></div>
+                        </div>
+
+                        <!-- Slider 3: AM / PM -->
+                        <div class="dt-time-slider-col dt-ampm-col" id="dtSliderAmPmCol">
+                          <div class="dt-slider-header">Period</div>
+                          <div class="dt-slider-scroll dt-ampm-scroll" id="dtSliderAmPmScroll">
+                            <div class="dt-slider-item" data-ampm="AM">AM</div>
+                            <div class="dt-slider-item" data-ampm="PM">PM</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Bottom Action & Validation Bar -->
+                    <div class="custom-dt-action-bar">
+                      <div class="custom-dt-selected-preview">
+                        <span id="customDtPreviewText">No deadline selected</span>
+                        <span class="custom-dt-err-hint" id="customDtErrHint" style="display: none;"><i class="fa-solid fa-triangle-exclamation"></i> Must be &ge; 20 min in future</span>
+                      </div>
+                      <div class="custom-dt-actions">
+                        <button type="button" class="btn btn-ghost btn-sm" id="customDtCancelBtn">Cancel</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="customDtDoneBtn">Apply</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div class="form-group">

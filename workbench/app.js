@@ -144,10 +144,502 @@ function getMinDeadlineISO(bufferMinutes = 20) {
 }
 
 /**
+ * Custom 12-Hour DateTime Picker with 3 Sliders (Hour, Min, AM/PM)
+ * and Calendar Grid with real-time minimum 20-minute validation.
+ */
+let customDtState = {
+    selectedDate: null,
+    selectedHour: 12,
+    selectedMinute: 0,
+    selectedAmPm: 'PM',
+    viewYear: new Date().getFullYear(),
+    viewMonth: new Date().getMonth(),
+    isOpen: false
+};
+
+function initCustomDateTimePicker() {
+    const picker = document.getElementById('customDtPicker');
+    if (!picker) return;
+
+    const trigger = document.getElementById('customDtTrigger');
+    const dropdown = document.getElementById('customDtDropdown');
+    const deadlineInput = document.getElementById('deadline');
+    const prevMonthBtn = document.getElementById('dtCalPrevMonth');
+    const nextMonthBtn = document.getElementById('dtCalNextMonth');
+    const todayBtn = document.getElementById('dtCalTodayBtn');
+    const clearBtn = document.getElementById('dtCalClearBtn');
+    const cancelBtn = document.getElementById('customDtCancelBtn');
+    const doneBtn = document.getElementById('customDtDoneBtn');
+    const hourScroll = document.getElementById('dtSliderHourScroll');
+    const minScroll = document.getElementById('dtSliderMinScroll');
+    const ampmScroll = document.getElementById('dtSliderAmPmScroll');
+
+    // Populate Slider 1: Hour (01 to 12)
+    if (hourScroll && !hourScroll.hasChildNodes()) {
+        for (let h = 1; h <= 12; h++) {
+            const item = document.createElement('div');
+            item.className = 'dt-slider-item';
+            item.dataset.hour = String(h);
+            item.textContent = String(h).padStart(2, '0');
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                customDtState.selectedHour = h;
+                updateSliderActiveItem('hour', h, true);
+                updateCustomDtPreview();
+            });
+            hourScroll.appendChild(item);
+        }
+    }
+
+    // Populate Slider 2: Minute (00 to 59)
+    if (minScroll && !minScroll.hasChildNodes()) {
+        for (let m = 0; m < 60; m++) {
+            const item = document.createElement('div');
+            item.className = 'dt-slider-item';
+            item.dataset.min = String(m);
+            item.textContent = String(m).padStart(2, '0');
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                customDtState.selectedMinute = m;
+                updateSliderActiveItem('min', m, true);
+                updateCustomDtPreview();
+            });
+            minScroll.appendChild(item);
+        }
+    }
+
+    // Populate Slider 3: AM / PM
+    if (ampmScroll && !ampmScroll.dataset.wired) {
+        ampmScroll.dataset.wired = 'true';
+        const ampmItems = ampmScroll.querySelectorAll('.dt-slider-item');
+        ampmItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                customDtState.selectedAmPm = item.dataset.ampm;
+                updateSliderActiveItem('ampm', customDtState.selectedAmPm, true);
+                updateCustomDtPreview();
+            });
+        });
+    }
+
+    // Trigger toggle
+    if (trigger && !trigger.dataset.wired) {
+        trigger.dataset.wired = 'true';
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (customDtState.isOpen) {
+                closeCustomDtDropdown();
+            } else {
+                openCustomDtDropdown();
+            }
+        });
+        trigger.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                if (customDtState.isOpen) {
+                    closeCustomDtDropdown();
+                } else {
+                    openCustomDtDropdown();
+                }
+            } else if (e.key === 'Escape') {
+                closeCustomDtDropdown();
+            }
+        });
+    }
+
+    // Month Navigation
+    if (prevMonthBtn && !prevMonthBtn.dataset.wired) {
+        prevMonthBtn.dataset.wired = 'true';
+        prevMonthBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            customDtState.viewMonth--;
+            if (customDtState.viewMonth < 0) {
+                customDtState.viewMonth = 11;
+                customDtState.viewYear--;
+            }
+            renderCustomDtCalendar();
+        });
+    }
+
+    if (nextMonthBtn && !nextMonthBtn.dataset.wired) {
+        nextMonthBtn.dataset.wired = 'true';
+        nextMonthBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            customDtState.viewMonth++;
+            if (customDtState.viewMonth > 11) {
+                customDtState.viewMonth = 0;
+                customDtState.viewYear++;
+            }
+            renderCustomDtCalendar();
+        });
+    }
+
+    // Today Button
+    if (todayBtn && !todayBtn.dataset.wired) {
+        todayBtn.dataset.wired = 'true';
+        todayBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const now = new Date();
+            customDtState.viewYear = now.getFullYear();
+            customDtState.viewMonth = now.getMonth();
+            customDtState.selectedDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            renderCustomDtCalendar();
+            updateCustomDtPreview();
+        });
+    }
+
+    // Clear Button
+    if (clearBtn && !clearBtn.dataset.wired) {
+        clearBtn.dataset.wired = 'true';
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetCustomDateTimePicker();
+        });
+    }
+
+    // Cancel Button
+    if (cancelBtn && !cancelBtn.dataset.wired) {
+        cancelBtn.dataset.wired = 'true';
+        cancelBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeCustomDtDropdown();
+        });
+    }
+
+    // Apply Button
+    if (doneBtn && !doneBtn.dataset.wired) {
+        doneBtn.dataset.wired = 'true';
+        doneBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            applyCustomDtSelection();
+        });
+    }
+
+    // Global outside click / Esc close
+    if (!window._customDtGlobalWired) {
+        window._customDtGlobalWired = true;
+        document.addEventListener('click', (e) => {
+            const p = document.getElementById('customDtPicker');
+            if (p && !p.contains(e.target) && customDtState.isOpen) {
+                closeCustomDtDropdown();
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && customDtState.isOpen) {
+                closeCustomDtDropdown();
+            }
+        });
+    }
+
+    if (deadlineInput && deadlineInput.value) {
+        syncCustomDtStateFromInput();
+        updateCustomDtDisplay();
+    }
+}
+
+function syncCustomDtStateFromInput() {
+    const deadlineInput = document.getElementById('deadline');
+    if (!deadlineInput || !deadlineInput.value) {
+        const def = new Date(Date.now() + 30 * 60 * 1000);
+        customDtState.selectedDate = new Date(def.getFullYear(), def.getMonth(), def.getDate());
+        customDtState.viewYear = def.getFullYear();
+        customDtState.viewMonth = def.getMonth();
+        const h = def.getHours();
+        customDtState.selectedAmPm = h >= 12 ? 'PM' : 'AM';
+        customDtState.selectedHour = h % 12 || 12;
+        customDtState.selectedMinute = def.getMinutes();
+        return;
+    }
+    const d = new Date(deadlineInput.value);
+    if (isNaN(d.getTime())) return;
+    customDtState.selectedDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    customDtState.viewYear = d.getFullYear();
+    customDtState.viewMonth = d.getMonth();
+    const h = d.getHours();
+    customDtState.selectedAmPm = h >= 12 ? 'PM' : 'AM';
+    customDtState.selectedHour = h % 12 || 12;
+    customDtState.selectedMinute = d.getMinutes();
+}
+
+function openCustomDtDropdown() {
+    const dropdown = document.getElementById('customDtDropdown');
+    const picker = document.getElementById('customDtPicker');
+    const trigger = document.getElementById('customDtTrigger');
+    if (!dropdown || !picker) return;
+
+    syncCustomDtStateFromInput();
+    renderCustomDtCalendar();
+    updateSliderActiveItem('hour', customDtState.selectedHour, true);
+    updateSliderActiveItem('min', customDtState.selectedMinute, true);
+    updateSliderActiveItem('ampm', customDtState.selectedAmPm, true);
+    updateCustomDtPreview();
+
+    dropdown.style.display = 'block';
+    picker.classList.add('is-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    customDtState.isOpen = true;
+}
+
+function closeCustomDtDropdown() {
+    const dropdown = document.getElementById('customDtDropdown');
+    const picker = document.getElementById('customDtPicker');
+    const trigger = document.getElementById('customDtTrigger');
+    if (!dropdown || !picker) return;
+
+    dropdown.style.display = 'none';
+    picker.classList.remove('is-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    customDtState.isOpen = false;
+}
+
+function updateSliderActiveItem(type, val, scroll = false) {
+    let containerId = '';
+    let attr = '';
+    if (type === 'hour') {
+        containerId = 'dtSliderHourScroll';
+        attr = 'data-hour';
+    } else if (type === 'min') {
+        containerId = 'dtSliderMinScroll';
+        attr = 'data-min';
+    } else if (type === 'ampm') {
+        containerId = 'dtSliderAmPmScroll';
+        attr = 'data-ampm';
+    }
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const items = container.querySelectorAll('.dt-slider-item');
+    let targetEl = null;
+    items.forEach(item => {
+        if (item.getAttribute(attr) == String(val)) {
+            item.classList.add('selected');
+            targetEl = item;
+        } else {
+            item.classList.remove('selected');
+        }
+    });
+
+    if (scroll && targetEl) {
+        setTimeout(() => {
+            const offset = targetEl.offsetTop - (container.clientHeight / 2) + (targetEl.clientHeight / 2);
+            container.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
+        }, 15);
+    }
+}
+
+function renderCustomDtCalendar() {
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    const monthYearEl = document.getElementById('dtCalMonthYear');
+    const daysGrid = document.getElementById('dtCalDaysGrid');
+    if (!daysGrid) return;
+
+    if (monthYearEl) {
+        monthYearEl.textContent = `${monthNames[customDtState.viewMonth]}, ${customDtState.viewYear}`;
+    }
+
+    daysGrid.innerHTML = '';
+
+    const y = customDtState.viewYear;
+    const m = customDtState.viewMonth;
+    const firstDayIndex = new Date(y, m, 1).getDay();
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const prevMonthLastDay = new Date(y, m, 0).getDate();
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = firstDayIndex - 1; i >= 0; i--) {
+        const d = prevMonthLastDay - i;
+        const cell = document.createElement('div');
+        cell.className = 'dt-cal-day other-month disabled';
+        cell.textContent = d;
+        daysGrid.appendChild(cell);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const cell = document.createElement('div');
+        cell.className = 'dt-cal-day';
+        cell.textContent = d;
+
+        const cellDate = new Date(y, m, d);
+        cellDate.setHours(0, 0, 0, 0);
+
+        if (cellDate < today) {
+            cell.classList.add('disabled');
+        } else {
+            cell.addEventListener('click', (e) => {
+                e.stopPropagation();
+                customDtState.selectedDate = new Date(y, m, d);
+                renderCustomDtCalendar();
+                updateCustomDtPreview();
+            });
+        }
+
+        if (cellDate.getTime() === today.getTime()) {
+            cell.classList.add('today');
+        }
+
+        if (customDtState.selectedDate) {
+            const sDate = new Date(customDtState.selectedDate);
+            sDate.setHours(0, 0, 0, 0);
+            if (cellDate.getTime() === sDate.getTime()) {
+                cell.classList.add('selected');
+            }
+        }
+
+        daysGrid.appendChild(cell);
+    }
+
+    const totalCells = daysGrid.children.length;
+    const remaining = (totalCells % 7 === 0) ? 0 : (7 - (totalCells % 7));
+    for (let i = 1; i <= remaining; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'dt-cal-day other-month disabled';
+        cell.textContent = i;
+        daysGrid.appendChild(cell);
+    }
+}
+
+function getCustomDtCandidateDate() {
+    if (!customDtState.selectedDate) return null;
+    let h = customDtState.selectedHour;
+    if (customDtState.selectedAmPm === 'AM') {
+        if (h === 12) h = 0;
+    } else {
+        if (h < 12) h += 12;
+    }
+    return new Date(
+        customDtState.selectedDate.getFullYear(),
+        customDtState.selectedDate.getMonth(),
+        customDtState.selectedDate.getDate(),
+        h,
+        customDtState.selectedMinute,
+        0,
+        0
+    );
+}
+
+function updateCustomDtPreview() {
+    const previewEl = document.getElementById('customDtPreviewText');
+    const errHint = document.getElementById('customDtErrHint');
+    const doneBtn = document.getElementById('customDtDoneBtn');
+    if (!previewEl) return;
+
+    const dt = getCustomDtCandidateDate();
+    if (!dt) {
+        previewEl.textContent = 'No date selected';
+        if (errHint) errHint.style.display = 'none';
+        if (doneBtn) {
+            doneBtn.disabled = true;
+            doneBtn.style.opacity = '0.5';
+        }
+        return;
+    }
+
+    const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const mStr = monthNamesShort[dt.getMonth()];
+    const dStr = dt.getDate();
+    const yStr = dt.getFullYear();
+    const hStr = String(customDtState.selectedHour).padStart(2, '0');
+    const minStr = String(customDtState.selectedMinute).padStart(2, '0');
+    const previewStr = `${mStr} ${dStr}, ${yStr}, ${hStr}:${minStr} ${customDtState.selectedAmPm}`;
+
+    previewEl.textContent = previewStr;
+
+    // Minimum 20 minutes from now (with 30s buffer)
+    const minAllowed = new Date(Date.now() + 20 * 60 * 1000 - 30000);
+    const isValid = dt >= minAllowed;
+
+    if (!isValid) {
+        if (errHint) errHint.style.display = 'inline-block';
+        if (doneBtn) {
+            doneBtn.disabled = true;
+            doneBtn.style.opacity = '0.5';
+        }
+    } else {
+        if (errHint) errHint.style.display = 'none';
+        if (doneBtn) {
+            doneBtn.disabled = false;
+            doneBtn.style.opacity = '1';
+        }
+    }
+}
+
+function applyCustomDtSelection() {
+    const dt = getCustomDtCandidateDate();
+    if (!dt) {
+        showToast('Please select a target date and time.', 'error');
+        return;
+    }
+
+    const minAllowed = new Date(Date.now() + 20 * 60 * 1000 - 30000);
+    if (dt < minAllowed) {
+        showToast('Deadline must be in the future (minimum 20 minutes from now).', 'error');
+        return;
+    }
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const isoLocal = `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+    const deadlineInput = document.getElementById('deadline');
+    if (deadlineInput) {
+        deadlineInput.value = isoLocal;
+        deadlineInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    updateCustomDtDisplay();
+    closeCustomDtDropdown();
+}
+
+function updateCustomDtDisplay() {
+    const displayVal = document.getElementById('customDtText');
+    const dt = getCustomDtCandidateDate();
+    if (!displayVal) return;
+
+    if (!dt) {
+        displayVal.textContent = 'Choose target deadline (12-hr)...';
+        displayVal.classList.add('placeholder');
+        return;
+    }
+
+    const monthNamesShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const mStr = monthNamesShort[dt.getMonth()];
+    const dStr = dt.getDate();
+    const yStr = dt.getFullYear();
+    const hStr = String(customDtState.selectedHour).padStart(2, '0');
+    const minStr = String(customDtState.selectedMinute).padStart(2, '0');
+    displayVal.textContent = `${mStr} ${dStr}, ${yStr}, ${hStr}:${minStr} ${customDtState.selectedAmPm}`;
+    displayVal.classList.remove('placeholder');
+}
+
+function resetCustomDateTimePicker() {
+    const deadlineInput = document.getElementById('deadline');
+    if (deadlineInput) {
+        deadlineInput.value = '';
+        deadlineInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    customDtState.selectedDate = null;
+    const displayVal = document.getElementById('customDtText');
+    if (displayVal) {
+        displayVal.textContent = 'Choose target deadline (12-hr)...';
+        displayVal.classList.add('placeholder');
+    }
+    const previewEl = document.getElementById('customDtPreviewText');
+    if (previewEl) previewEl.textContent = 'No deadline selected';
+    const errHint = document.getElementById('customDtErrHint');
+    if (errHint) errHint.style.display = 'none';
+    closeCustomDtDropdown();
+}
+
+/**
  * Enforces strictly future deadlines (minimum 20 minutes from now)
- * on the target deadline datetime-local input.
+ * on the target deadline datetime-local input or custom 12-hour picker.
  */
 function setupDeadlineConstraint() {
+    if (document.getElementById('customDtPicker')) {
+        initCustomDateTimePicker();
+        return;
+    }
+
     const deadlineInput = document.getElementById('deadline');
     if (!deadlineInput) return;
 
@@ -179,11 +671,102 @@ function setupDeadlineConstraint() {
     setInterval(enforceMin, 30000);
 }
 
+/**
+ * Bell Jingle & Login Slide-In Notifications
+ */
+function triggerBellJingle() {
+    const bellBtn = document.getElementById('notifBellBtn');
+    if (!bellBtn) return;
+    const icon = bellBtn.querySelector('i');
+    if (icon) {
+        icon.classList.remove('bell-ringing-active');
+        void icon.offsetWidth;
+        icon.classList.add('bell-ringing-active');
+        setTimeout(() => {
+            icon.classList.remove('bell-ringing-active');
+        }, 3600);
+    }
+}
+
+function showLoginNotificationSlidein(unreadCount, list) {
+    let slidein = document.getElementById('loginNotifSlidein');
+    if (!slidein) {
+        slidein = document.createElement('div');
+        slidein.id = 'loginNotifSlidein';
+        slidein.className = 'login-notif-slidein';
+        document.body.appendChild(slidein);
+    }
+
+    const unreadItems = (list || []).filter(n => !n.is_read);
+    const newest = unreadItems[0];
+    const previewMsg = newest ? escapeHtml(newest.message) : 'You have pending deliverables or announcements.';
+
+    slidein.innerHTML = `
+        <div class="login-notif-box">
+            <div class="login-notif-top">
+                <div class="login-notif-icon-bubble">
+                    <i class="fa-solid fa-bell bell-jingle-icon"></i>
+                    <span class="login-notif-count-badge">${unreadCount}</span>
+                </div>
+                <div class="login-notif-headline">
+                    <h4>${unreadCount === 1 ? '1 Unread Notification' : `${unreadCount} Unread Notifications`}</h4>
+                    <p>IEEE Workbench Executive Center</p>
+                </div>
+                <button type="button" class="login-notif-close-btn" id="loginNotifCloseBtn" title="Dismiss">&times;</button>
+            </div>
+            <div class="login-notif-preview">
+                <i class="fa-solid fa-quote-left" style="opacity: 0.5; font-size: 0.72rem; margin-top: 0.2rem;"></i>
+                <span>${previewMsg}</span>
+            </div>
+            <div class="login-notif-actions">
+                <button type="button" class="btn btn-primary btn-sm login-notif-btn" id="loginNotifViewBtn">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Notifications
+                </button>
+            </div>
+        </div>
+    `;
+
+    slidein.classList.remove('slide-out');
+    slidein.classList.add('slide-in');
+
+    const closeSlidein = () => {
+        slidein.classList.remove('slide-in');
+        slidein.classList.add('slide-out');
+        setTimeout(() => {
+            if (slidein && slidein.parentNode) {
+                slidein.remove();
+            }
+        }, 400);
+    };
+
+    document.getElementById('loginNotifCloseBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSlidein();
+    });
+
+    document.getElementById('loginNotifViewBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeSlidein();
+        const dropdown = document.getElementById('headerNotifDropdown');
+        if (dropdown && !dropdown.classList.contains('active')) {
+            window.toggleNotificationPanel();
+        }
+    });
+
+    if (window._notifSlideinTimer) clearTimeout(window._notifSlideinTimer);
+    window._notifSlideinTimer = setTimeout(closeSlidein, 8000);
+}
+
 // Header Notifications
 window.toggleNotificationPanel = function(event) {
     if (event) event.stopPropagation();
     const dropdown = document.getElementById('headerNotifDropdown');
     if (!dropdown) return;
+    const bellBtn = document.getElementById('notifBellBtn');
+    if (bellBtn) {
+        const icon = bellBtn.querySelector('i');
+        if (icon) icon.classList.remove('bell-ringing-active');
+    }
     const isActive = dropdown.classList.contains('active');
     if (isActive) {
         dropdown.classList.remove('active');
@@ -443,6 +1026,7 @@ function initLogin() {
 
             // Persist session
             setSession(token, rawUser);
+            sessionStorage.setItem('workbench_just_logged_in', 'true');
             showToast(`Welcome back, ${rawUser.username}!`);
 
             // Execute role-based redirect
@@ -591,6 +1175,13 @@ async function initSuperAdminDashboard() {
             const assigned_to = document.getElementById('assignTo').value;
             const deadlineRaw = document.getElementById('deadline').value;
 
+            if (!assigned_to) {
+                showToast('Please select a member to assign the deliverable.', 'error');
+                const searchInput = document.getElementById('assignToSearchInput');
+                if (searchInput) searchInput.focus();
+                return;
+            }
+
             if (!deadlineRaw) {
                 showToast('Please specify a target deadline.', 'error');
                 return;
@@ -618,6 +1209,8 @@ async function initSuperAdminDashboard() {
                 });
 
                 taskForm.reset();
+                resetSearchableMemberSelect();
+                resetCustomDateTimePicker();
                 setupDeadlineConstraint();
                 if (allowReassignEl) allowReassignEl.checked = true;
                 await loadTasks(role, superAdminCurrentTeamFilter);
@@ -1082,10 +1675,276 @@ window.closeEditModal = function() {
     document.getElementById('editRoleModal').classList.remove('active');
 };
 
-async function loadSuperAdminAssigneeDropdown() {
-    const select = document.getElementById('assignTo');
-    if (!select) return;
+/**
+ * Searchable Member Combobox
+ * Enables real-time typing to filter and select members from a dropdown list.
+ */
+let searchableMembersList = [];
+let searchableHighlightedIndex = -1;
 
+function setupSearchableMemberSelect(members) {
+    searchableMembersList = members || [];
+    searchableHighlightedIndex = -1;
+
+    const wrap = document.getElementById('assignToSearchWrap');
+    const hiddenInput = document.getElementById('assignTo');
+    const searchInput = document.getElementById('assignToSearchInput');
+    const dropdown = document.getElementById('assignToDropdown');
+    const listContainer = document.getElementById('assignToList');
+    const clearBtn = document.getElementById('assignToClearBtn');
+    const chevron = document.getElementById('assignToChevron');
+
+    // Backward-compatible fallback for static select elements
+    if (!wrap) {
+        if (hiddenInput && hiddenInput.tagName === 'SELECT') {
+            hiddenInput.innerHTML = '<option value="">-- Choose Member --</option>';
+            searchableMembersList.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.textContent = m.team ? `[${m.team}] ${m.name}` : m.name;
+                hiddenInput.appendChild(opt);
+            });
+        }
+        return;
+    }
+
+    if (!searchInput || !dropdown || !listContainer) return;
+
+    function renderList(query = '') {
+        const q = (query || '').trim().toLowerCase();
+        let matches = searchableMembersList;
+        if (q) {
+            matches = searchableMembersList.filter(m => {
+                const nameMatch = (m.name || '').toLowerCase().includes(q);
+                const teamMatch = (m.team || '').toLowerCase().includes(q);
+                const roleMatch = (m.role || '').toLowerCase().includes(q);
+                return nameMatch || teamMatch || roleMatch;
+            });
+        }
+
+        listContainer.innerHTML = '';
+        searchableHighlightedIndex = -1;
+
+        if (matches.length === 0) {
+            listContainer.innerHTML = `
+                <div class="searchable-empty-msg">
+                    <i class="fa-solid fa-user-slash" style="font-size: 1.25rem; opacity: 0.4;"></i>
+                    <span>No members found matching "<strong>${escapeHtml(query)}</strong>"</span>
+                </div>
+            `;
+            return;
+        }
+
+        matches.forEach((m, idx) => {
+            const itemEl = document.createElement('div');
+            itemEl.className = 'searchable-select-item';
+            itemEl.dataset.memberId = m.id;
+            itemEl.dataset.memberName = m.name;
+            itemEl.dataset.memberTeam = m.team || '';
+
+            if (hiddenInput && String(hiddenInput.value) === String(m.id)) {
+                itemEl.classList.add('is-selected');
+            }
+
+            // Highlight matched substring
+            let nameHtml = escapeHtml(m.name);
+            if (q) {
+                const regex = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                nameHtml = escapeHtml(m.name).replace(regex, '<mark>$1</mark>');
+            }
+
+            const initials = getInitials(m.name);
+            const teamBadge = m.team ? `<span class="searchable-item-tag">${escapeHtml(m.team)}</span>` : '';
+
+            itemEl.innerHTML = `
+                <div class="searchable-item-main">
+                    <div class="searchable-item-avatar">${initials}</div>
+                    <span class="searchable-item-name">${nameHtml}</span>
+                </div>
+                ${teamBadge}
+            `;
+
+            itemEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectMember(m);
+            });
+
+            itemEl.addEventListener('mouseenter', () => {
+                highlightItem(idx);
+            });
+
+            listContainer.appendChild(itemEl);
+        });
+    }
+
+    function highlightItem(index) {
+        const items = listContainer.querySelectorAll('.searchable-select-item');
+        items.forEach((el, i) => {
+            if (i === index) {
+                el.classList.add('is-highlighted');
+                searchableHighlightedIndex = i;
+                el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            } else {
+                el.classList.remove('is-highlighted');
+            }
+        });
+    }
+
+    function selectMember(m) {
+        if (!m) return;
+        if (hiddenInput) {
+            hiddenInput.value = m.id;
+            hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        searchInput.value = m.team ? `${m.name} [${m.team}]` : m.name;
+        searchInput.dataset.selectedId = m.id;
+        if (clearBtn) clearBtn.style.display = 'flex';
+        closeDropdown();
+    }
+
+    function openDropdown() {
+        const q = (searchInput.value && !searchInput.dataset.selectedId) ? searchInput.value : '';
+        renderList(q);
+        dropdown.style.display = 'block';
+        wrap.classList.add('is-open');
+    }
+
+    function closeDropdown() {
+        dropdown.style.display = 'none';
+        wrap.classList.remove('is-open');
+    }
+
+    if (!searchInput.dataset.wired) {
+        searchInput.dataset.wired = 'true';
+
+        searchInput.addEventListener('focus', () => {
+            openDropdown();
+        });
+
+        searchInput.addEventListener('click', () => {
+            openDropdown();
+        });
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value;
+            if (hiddenInput) hiddenInput.value = '';
+            delete searchInput.dataset.selectedId;
+
+            if (clearBtn) {
+                clearBtn.style.display = query ? 'flex' : 'none';
+            }
+
+            openDropdown();
+            renderList(query);
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            const items = listContainer.querySelectorAll('.searchable-select-item');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (dropdown.style.display === 'none') {
+                    openDropdown();
+                    return;
+                }
+                let next = searchableHighlightedIndex + 1;
+                if (next >= items.length) next = 0;
+                highlightItem(next);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (dropdown.style.display === 'none') {
+                    openDropdown();
+                    return;
+                }
+                let prev = searchableHighlightedIndex - 1;
+                if (prev < 0) prev = items.length - 1;
+                highlightItem(prev);
+            } else if (e.key === 'Enter') {
+                if (dropdown.style.display !== 'none') {
+                    e.preventDefault();
+                    if (searchableHighlightedIndex >= 0 && items[searchableHighlightedIndex]) {
+                        items[searchableHighlightedIndex].click();
+                    } else if (items.length === 1) {
+                        items[0].click();
+                    }
+                }
+            } else if (e.key === 'Escape') {
+                closeDropdown();
+            }
+        });
+    }
+
+    if (chevron && !chevron.dataset.wired) {
+        chevron.dataset.wired = 'true';
+        chevron.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (dropdown.style.display === 'none') {
+                searchInput.focus();
+                openDropdown();
+            } else {
+                closeDropdown();
+            }
+        });
+    }
+
+    if (clearBtn && !clearBtn.dataset.wired) {
+        clearBtn.dataset.wired = 'true';
+        clearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetSearchableMemberSelect();
+            searchInput.focus();
+            openDropdown();
+        });
+    }
+
+    if (!window._searchableSelectGlobalWired) {
+        window._searchableSelectGlobalWired = true;
+        document.addEventListener('click', (e) => {
+            const currentWrap = document.getElementById('assignToSearchWrap');
+            if (currentWrap && !currentWrap.contains(e.target)) {
+                const currentDropdown = document.getElementById('assignToDropdown');
+                if (currentDropdown) currentDropdown.style.display = 'none';
+                currentWrap.classList.remove('is-open');
+
+                // If user typed exact matching name without clicking item
+                const sInput = document.getElementById('assignToSearchInput');
+                const hInput = document.getElementById('assignTo');
+                if (sInput && hInput && !hInput.value && sInput.value.trim()) {
+                    const text = sInput.value.trim().toLowerCase();
+                    const exact = searchableMembersList.find(m => m.name.toLowerCase() === text);
+                    if (exact) {
+                        hInput.value = exact.id;
+                        sInput.value = exact.team ? `${exact.name} [${exact.team}]` : exact.name;
+                        sInput.dataset.selectedId = exact.id;
+                        if (clearBtn) clearBtn.style.display = 'flex';
+                    }
+                }
+            }
+        });
+    }
+}
+
+function resetSearchableMemberSelect() {
+    const hiddenInput = document.getElementById('assignTo');
+    const searchInput = document.getElementById('assignToSearchInput');
+    const clearBtn = document.getElementById('assignToClearBtn');
+    const dropdown = document.getElementById('assignToDropdown');
+    const wrap = document.getElementById('assignToSearchWrap');
+
+    if (hiddenInput) {
+        hiddenInput.value = '';
+        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    if (searchInput) {
+        searchInput.value = '';
+        delete searchInput.dataset.selectedId;
+    }
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (dropdown) dropdown.style.display = 'none';
+    if (wrap) wrap.classList.remove('is-open');
+    searchableHighlightedIndex = -1;
+}
+
+async function loadSuperAdminAssigneeDropdown() {
     try {
         let membersRes = null;
         try {
@@ -1095,9 +1954,9 @@ async function loadSuperAdminAssigneeDropdown() {
         }
 
         const members = unpackList(membersRes, 'members');
-        select.innerHTML = '<option value="">-- Choose Member --</option>';
-
         const currentUser = getStoredUser();
+
+        const assignees = [];
         members.forEach(m => {
             const socName = (m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '').toLowerCase();
             const rTitle = (m.role || m.position || '').toLowerCase();
@@ -1108,14 +1967,17 @@ async function loadSuperAdminAssigneeDropdown() {
             if (currentUser && (m.id == currentUser.id || m.username == currentUser.username || m.name == currentUser.username || m.name == currentUser.name)) {
                 return;
             }
-            const opt = document.createElement('option');
-            opt.value = m.id;
-            const teamName = m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society);
-            const teamTag = teamName ? `[${teamName}] ` : '';
+            const teamName = m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '';
             const displayName = m.name || m.username;
-            opt.textContent = `${teamTag}${displayName}`;
-            select.appendChild(opt);
+            assignees.push({
+                id: m.id,
+                name: displayName,
+                team: teamName,
+                role: m.role || m.position || ''
+            });
         });
+
+        setupSearchableMemberSelect(assignees);
     } catch (err) {
         console.error('Failed to load assignees from Django:', err);
     }
@@ -1169,6 +2031,8 @@ async function initAdminDashboard() {
 
             if (!assigned_to) {
                 showToast('Please select a team member to assign the deliverable.', 'error');
+                const searchInput = document.getElementById('assignToSearchInput');
+                if (searchInput) searchInput.focus();
                 return;
             }
 
@@ -1196,6 +2060,8 @@ async function initAdminDashboard() {
                 });
 
                 taskForm.reset();
+                resetSearchableMemberSelect();
+                resetCustomDateTimePicker();
                 setupDeadlineConstraint();
                 await loadTasks('team_lead', user.team_id);
                 await loadAnalytics('team_lead');
@@ -1227,16 +2093,12 @@ async function initAdminDashboard() {
 }
 
 async function loadTeamMemberDropdown() {
-    const select = document.getElementById('assignTo');
-    if (!select) return;
-
     try {
         const membersRes = await apiRequest('/members/');
         const members = unpackList(membersRes, 'members');
-        select.innerHTML = '<option value="">-- Choose Team Member --</option>';
-
         const currentUser = getStoredUser();
-        let addedCount = 0;
+
+        const assignees = [];
         members.forEach(m => {
             const socName = (m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '').toLowerCase();
             const rTitle = (m.role || m.position || '').toLowerCase();
@@ -1247,16 +2109,17 @@ async function loadTeamMemberDropdown() {
             if (currentUser && (m.id == currentUser.id || m.username == currentUser.username || m.name == currentUser.username || m.name == currentUser.name)) {
                 return;
             }
-            const opt = document.createElement('option');
-            opt.value = m.id;
-            opt.textContent = `${m.name || m.username}`;
-            select.appendChild(opt);
-            addedCount++;
+            const teamName = m.team_name || (typeof m.society === 'object' ? m.society?.name : m.society) || '';
+            const displayName = m.name || m.username;
+            assignees.push({
+                id: m.id,
+                name: displayName,
+                team: teamName,
+                role: m.role || m.position || ''
+            });
         });
 
-        if (addedCount === 0) {
-            select.innerHTML = '<option value="">-- No other team members available --</option>';
-        }
+        setupSearchableMemberSelect(assignees);
     } catch (err) {
         console.error('Failed to load team members from Django:', err);
     }
@@ -2422,6 +3285,22 @@ async function loadNotifications(role) {
         if (dropdownCount) {
             dropdownCount.textContent = unreadCount;
         }
+
+        // 1b. Check for login notification slide-in & bell jingle animation
+        const justLoggedIn = sessionStorage.getItem('workbench_just_logged_in') === 'true';
+        const prevCountStr = sessionStorage.getItem('wb_prev_unread_count');
+        const prevUnreadCount = prevCountStr !== null ? parseInt(prevCountStr, 10) : null;
+
+        if (unreadCount > 0) {
+            if (justLoggedIn || (prevUnreadCount !== null && unreadCount > prevUnreadCount)) {
+                triggerBellJingle();
+                showLoginNotificationSlidein(unreadCount, list);
+                sessionStorage.removeItem('workbench_just_logged_in');
+            }
+        } else {
+            sessionStorage.removeItem('workbench_just_logged_in');
+        }
+        sessionStorage.setItem('wb_prev_unread_count', String(unreadCount));
 
         // 2. Populate Header Dropdown List
         if (dropdownList) {
