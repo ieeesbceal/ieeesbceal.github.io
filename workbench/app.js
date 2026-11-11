@@ -1011,8 +1011,8 @@ async function apiRequest(endpoint, method = 'GET', body = null) {
         const url = `${API_BASE_URL}${cleanEndpoint}`;
         const response = await fetch(url, options);
 
-        if ((response.status === 401 || response.status === 403) && !cleanEndpoint.includes('login')) {
-            showToast('Session expired or unauthorized. Redirecting to login...', 'error');
+        if (response.status === 401 && !cleanEndpoint.includes('login')) {
+            showToast('Session expired. Redirecting to login...', 'error');
             setTimeout(logout, 1200);
             return null;
         }
@@ -1329,11 +1329,7 @@ async function initSuperAdminDashboard() {
             const team_id = teamVal ? Number(teamVal) : null;
 
             try {
-                try {
-                    await apiRequest(`/users/${currentEditingUserId}/role/`, 'PATCH', { role, team_id });
-                } catch (patchErr) {
-                    await apiRequest(`/admins/edit/${currentEditingUserId}/`, 'POST', { role, team_id });
-                }
+                await apiRequest(`/users/${currentEditingUserId}/role/`, 'PATCH', { role, team_id });
 
                 closeEditModal();
                 const user = getStoredUser();
