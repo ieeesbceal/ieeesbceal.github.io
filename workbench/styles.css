@@ -1696,6 +1696,14 @@ textarea.form-control {
   color: var(--text-secondary);
 }
 
+.task-created-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.73rem;
+  color: var(--text-tertiary);
+}
+
 .task-assigned-tag {
   display: flex;
   align-items: center;
@@ -1891,6 +1899,10 @@ textarea.form-control {
 
 [data-theme="dark"] .task-audit-row strong {
   color: #f8fafc !important;
+}
+
+[data-theme="dark"] .task-created-tag {
+  color: #94a3b8 !important;
 }
 
 [data-theme="dark"] .task-closed-tag {

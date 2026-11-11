@@ -128,6 +128,57 @@ if (typeof document !== 'undefined') {
     initThemeSystem();
 }
 
+/**
+ * Calculates ISO format string for datetime-local input
+ * with a specified minimum future buffer (default: 20 minutes)
+ */
+function getMinDeadlineISO(bufferMinutes = 20) {
+    const d = new Date(Date.now() + bufferMinutes * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    const year = d.getFullYear();
+    const month = pad(d.getMonth() + 1);
+    const day = pad(d.getDate());
+    const hours = pad(d.getHours());
+    const minutes = pad(d.getMinutes());
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+/**
+ * Enforces strictly future deadlines (minimum 20 minutes from now)
+ * on the target deadline datetime-local input.
+ */
+function setupDeadlineConstraint() {
+    const deadlineInput = document.getElementById('deadline');
+    if (!deadlineInput) return;
+
+    const enforceMin = () => {
+        const minISO = getMinDeadlineISO(20);
+        deadlineInput.min = minISO;
+        if (deadlineInput.value) {
+            const chosen = new Date(deadlineInput.value);
+            const minAllowed = new Date(Date.now() + 20 * 60 * 1000 - 30000);
+            if (chosen < minAllowed) {
+                deadlineInput.value = minISO;
+            }
+        }
+    };
+
+    enforceMin();
+    deadlineInput.addEventListener('focus', enforceMin);
+    deadlineInput.addEventListener('click', enforceMin);
+    deadlineInput.addEventListener('change', () => {
+        if (!deadlineInput.value) return;
+        const chosen = new Date(deadlineInput.value);
+        const minAllowed = new Date(Date.now() + 20 * 60 * 1000 - 30000);
+        if (chosen < minAllowed) {
+            showToast('Deadline must be in the future (minimum 20 minutes from now).', 'error');
+            deadlineInput.value = getMinDeadlineISO(20);
+        }
+    });
+
+    setInterval(enforceMin, 30000);
+}
+
 // Header Notifications
 window.toggleNotificationPanel = function(event) {
     if (event) event.stopPropagation();
@@ -532,13 +583,27 @@ async function initSuperAdminDashboard() {
     // Setup Global Task Assignment Form
     const taskForm = document.getElementById('createTaskForm');
     if (taskForm) {
+        setupDeadlineConstraint();
         taskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('taskTitle').value.trim();
             const description = document.getElementById('taskDesc').value.trim();
             const assigned_to = document.getElementById('assignTo').value;
             const deadlineRaw = document.getElementById('deadline').value;
-            const deadline = deadlineRaw ? new Date(deadlineRaw).toISOString() : null;
+
+            if (!deadlineRaw) {
+                showToast('Please specify a target deadline.', 'error');
+                return;
+            }
+
+            const deadlineDate = new Date(deadlineRaw);
+            const minAllowedDate = new Date(Date.now() + 20 * 60 * 1000 - 30000); // 30s buffer
+            if (deadlineDate < minAllowedDate) {
+                showToast('Target deadline must be in the future (minimum 20 minutes from now).', 'error');
+                return;
+            }
+
+            const deadline = deadlineDate.toISOString();
             const allowReassignEl = document.getElementById('allowReassign');
             const allow_reassign = allowReassignEl ? allowReassignEl.checked : true;
 
@@ -553,6 +618,7 @@ async function initSuperAdminDashboard() {
                 });
 
                 taskForm.reset();
+                setupDeadlineConstraint();
                 if (allowReassignEl) allowReassignEl.checked = true;
                 await loadTasks(role, superAdminCurrentTeamFilter);
                 await loadAnalytics(role, superAdminCurrentTeamFilter);
@@ -1093,18 +1159,32 @@ async function initAdminDashboard() {
 
     const taskForm = document.getElementById('createTaskForm');
     if (taskForm) {
+        setupDeadlineConstraint();
         taskForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const title = document.getElementById('taskTitle').value.trim();
             const description = document.getElementById('taskDesc').value.trim();
             const assigned_to = document.getElementById('assignTo').value;
             const deadlineRaw = document.getElementById('deadline').value;
-            const deadline = deadlineRaw ? new Date(deadlineRaw).toISOString() : null;
 
             if (!assigned_to) {
                 showToast('Please select a team member to assign the deliverable.', 'error');
                 return;
             }
+
+            if (!deadlineRaw) {
+                showToast('Please specify a target deadline.', 'error');
+                return;
+            }
+
+            const deadlineDate = new Date(deadlineRaw);
+            const minAllowedDate = new Date(Date.now() + 20 * 60 * 1000 - 30000); // 30s buffer
+            if (deadlineDate < minAllowedDate) {
+                showToast('Target deadline must be in the future (minimum 20 minutes from now).', 'error');
+                return;
+            }
+
+            const deadline = deadlineDate.toISOString();
 
             try {
                 await apiRequest('/tasks/', 'POST', {
@@ -1116,6 +1196,7 @@ async function initAdminDashboard() {
                 });
 
                 taskForm.reset();
+                setupDeadlineConstraint();
                 await loadTasks('team_lead', user.team_id);
                 await loadAnalytics('team_lead');
                 showToast('Deliverable assigned to team member!');
@@ -1277,6 +1358,10 @@ async function loadTasks(role, teamFilter = null) {
                 month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
             }) : 'No deadline';
 
+            const createdDateStr = task.created_at ? new Date(task.created_at).toLocaleDateString(undefined, {
+                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            }) : 'Recently';
+
             let statusBadge = '';
             if (isCompleted) {
                 statusBadge = '<span class="badge badge-done"><span class="badge-dot"></span>DONE</span>';
@@ -1431,7 +1516,7 @@ async function loadTasks(role, teamFilter = null) {
                 </button>
             ` : '';
 
-            // Audit info (who assigned to whom, and who closed the task)
+            // Audit info (who assigned to whom, creation time, and who closed the task)
             const closedByName = task.closed_by_name;
             const closedAtStr = task.closed_at ? new Date(task.closed_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
             
@@ -1439,6 +1524,10 @@ async function loadTasks(role, teamFilter = null) {
             if (isCompleted) {
                 auditTrailHtml = `
                     <div class="task-audit-row">
+                        <div class="task-created-tag">
+                            <i class="fa-regular fa-calendar-plus" style="font-size: 0.68rem; color: var(--primary);"></i>
+                            <span>Created: <strong>${createdDateStr}</strong></span>
+                        </div>
                         <div class="task-assigned-tag">
                             <i class="fa-solid fa-arrow-right-arrow-left" style="font-size: 0.68rem; color: var(--text-tertiary);"></i>
                             <span>Assigned by <strong>${escapeHtml(assignerName)}</strong> to <strong>${escapeHtml(assigneeName)}</strong></span>
@@ -1452,6 +1541,10 @@ async function loadTasks(role, teamFilter = null) {
             } else {
                 auditTrailHtml = `
                     <div class="task-audit-row">
+                        <div class="task-created-tag">
+                            <i class="fa-regular fa-calendar-plus" style="font-size: 0.68rem; color: var(--primary);"></i>
+                            <span>Created: <strong>${createdDateStr}</strong></span>
+                        </div>
                         <div class="task-assigned-tag">
                             <i class="fa-solid fa-user-tag" style="font-size: 0.7rem; color: var(--text-tertiary);"></i>
                             <span>Assigned by <strong>${escapeHtml(assignerName)}</strong> to <strong>${escapeHtml(assigneeName)}</strong></span>
@@ -1470,7 +1563,7 @@ async function loadTasks(role, teamFilter = null) {
                 ${reworkHtml}
                 <div class="card-footer">
                     <div class="meta-row">
-                        <span><i class="fa-regular fa-clock" style="margin-right: 0.25rem;"></i>Due ${formattedDate}</span>
+                        <span><i class="fa-regular fa-clock" style="margin-right: 0.25rem;"></i>Due: <strong>${formattedDate}</strong></span>
                         <span class="deadline-text ${isOverdue ? 'overdue' : ''}">${isCompleted ? 'Finished' : (isOverdue ? 'Overdue' : 'Active')}</span>
                     </div>
                     ${auditTrailHtml}
@@ -1485,6 +1578,8 @@ async function loadTasks(role, teamFilter = null) {
                     title: task.title,
                     description: task.description,
                     deadline: task.deadline,
+                    created_at: task.created_at,
+                    createdDateStr: createdDateStr,
                     closed_at: task.closed_at,
                     closedByName: closedByName,
                     closedAtStr: closedAtStr,
@@ -1539,7 +1634,7 @@ function renderCompletedTasksColumn(role) {
                 <span class="badge badge-done" style="font-size: 0.62rem; padding: 0.1rem 0.35rem;">DONE</span>
             </div>
             <div style="font-size: 0.73rem; color: var(--text-secondary); line-height: 1.35;">
-                Assigned to <strong>${escapeHtml(latest.assigneeName)}</strong> by <strong>${escapeHtml(latest.assignerName)}</strong>
+                Created: <strong>${latest.createdDateStr || 'Recently'}</strong> &bull; Assigned to <strong>${escapeHtml(latest.assigneeName)}</strong> by <strong>${escapeHtml(latest.assignerName)}</strong>
             </div>
             ${latest.closedByName ? `<div style="font-size: 0.7rem; color: #059669; margin-top: 0.2rem;"><i class="fa-solid fa-check"></i> Closed by ${escapeHtml(latest.closedByName)}</div>` : ''}
         </div>
@@ -1728,6 +1823,14 @@ window.filterAllFinishedModalList = function() {
             </div>
 
             <div class="finished-audit-grid">
+                <div class="finished-audit-item">
+                    <i class="fa-regular fa-calendar-plus" style="color: var(--primary);"></i>
+                    <div>
+                        <div style="font-size: 0.7rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 700; letter-spacing: 0.03em;">Created On</div>
+                        <div class="audit-val" style="color: var(--text-primary); font-size: 0.82rem;">${task.createdDateStr || 'Recently'}</div>
+                    </div>
+                </div>
+
                 <div class="finished-audit-item">
                     <i class="fa-solid fa-user-check" style="color: #0284c7;"></i>
                     <div>
@@ -3067,7 +3170,7 @@ window.renderMemberPerformanceModal = function(data) {
 
                     <div style="display: flex; flex-wrap: wrap; gap: 0.85rem; font-size: 0.78rem; color: var(--text-tertiary); margin-top: 0.25rem;">
                         <span><i class="fa-regular fa-calendar-check" style="margin-right: 0.25rem;"></i>Deadline: <strong>${formatDateTime(t.deadline)}</strong></span>
-                        ${t.created_at ? `<span><i class="fa-regular fa-calendar-plus" style="margin-right: 0.25rem;"></i>Assigned: ${formatDateOnly(t.created_at)}</span>` : ''}
+                        ${t.created_at ? `<span><i class="fa-regular fa-calendar-plus" style="margin-right: 0.25rem;"></i>Created: <strong>${formatDateTime(t.created_at)}</strong></span>` : ''}
                         ${t.assigned_by_name ? `<span><i class="fa-solid fa-user-tag" style="margin-right: 0.25rem;"></i>By: ${escapeHtml(t.assigned_by_name)}</span>` : ''}
                     </div>
 
